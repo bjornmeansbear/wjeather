@@ -1,0 +1,91 @@
+@import 'tailwindcss';
+
+/* kit.css is copied verbatim from ~/Code/color-system-and-guidelines.
+   Layered as base so Tailwind utilities still win over its element rules. */
+@import '../lib/kit.css' layer(base);
+
+/* Project tokens. The temperature sits above the kit's h1 rung, so it gets
+   its own size — still on the 6px baseline grid. */
+:root {
+	--text-display: 10rem; /* 160 */
+	--leading-display: 8.25rem; /* 132 = 22 × 6 */
+}
+
+@media (min-width: 40rem) {
+	:root {
+		--text-display: 15rem; /* 240 */
+		--leading-display: 12rem; /* 192 = 32 × 6 */
+	}
+}
+
+@media (min-width: 55rem) {
+	:root {
+		--text-display: 20rem; /* 320 */
+		--leading-display: 15.75rem; /* 252 = 42 × 6 */
+	}
+}
+
+/* Dark mode — the measured mapping from RULES.md "Dark mode". */
+@media (prefers-color-scheme: dark) {
+	:root {
+		color-scheme: dark;
+		--color-bg: var(--brown-9);
+		--color-surface: var(--brown-9);
+		--color-surface-2: var(--brown-9);
+		--color-text: var(--brown-0); /* 18.81:1 */
+		--color-text-muted: var(--brown-3); /* 10.49:1 */
+		--color-text-subtle: var(--brown-4); /* 7.06:1 */
+		--color-accent: var(--pink-3); /* 8.67:1 */
+		--color-accent-hover: var(--pink-2); /* brown-9 on pink-2: 10.93:1 */
+	}
+}
+
+/* Tailwind reads the kit's tokens instead of its own palette. Defaults are
+   cleared so only kit colors, type steps and breakpoints exist as utilities. */
+@theme {
+	--color-*: initial;
+	--font-*: initial;
+	--text-*: initial;
+	--breakpoint-*: initial;
+
+	--breakpoint-tablet: 40rem;
+	--breakpoint-desktop: 55rem;
+
+	/* p-1 = 6px, p-4 = 24px: spacing rides the same rhythm as the type. */
+	--spacing: 0.375rem;
+}
+
+@theme inline reference {
+	--color-bg: var(--color-bg);
+	--color-text: var(--color-text);
+	--color-text-muted: var(--color-text-muted);
+	--color-text-subtle: var(--color-text-subtle);
+	--color-border: var(--color-border);
+	--color-accent: var(--color-accent);
+	--color-accent-hover: var(--color-accent-hover);
+
+	--font-sans: var(--font-sans);
+	--font-display: var(--font-display);
+	--font-mono: var(--font-mono);
+
+	--text-2xs: var(--text-2xs);
+	--text-2xs--line-height: var(--leading-2xs);
+	--text-xs: var(--text-xs);
+	--text-xs--line-height: var(--leading-xs);
+	--text-sm: var(--text-sm);
+	--text-sm--line-height: var(--leading-sm);
+	--text-base: var(--text-base);
+	--text-base--line-height: var(--leading-base);
+	--text-md: var(--text-md);
+	--text-md--line-height: var(--leading-md);
+	--text-lg: var(--text-lg);
+	--text-lg--line-height: var(--leading-lg);
+	--text-xl: var(--text-xl);
+	--text-xl--line-height: var(--leading-xl);
+	--text-2xl: var(--text-2xl);
+	--text-2xl--line-height: var(--leading-2xl);
+	--text-3xl: var(--text-3xl);
+	--text-3xl--line-height: var(--leading-3xl);
+	--text-display: var(--text-display);
+	--text-display--line-height: var(--leading-display);
+}
