@@ -1,5 +1,6 @@
 <script lang="ts">
 	import ForecastLine from '$lib/ForecastLine.svelte';
+	import Legend from '$lib/Legend.svelte';
 	import SkyBands from '$lib/SkyBands.svelte';
 	import Stars from '$lib/Stars.svelte';
 	import WindHatch from '$lib/WindHatch.svelte';
@@ -27,6 +28,10 @@
 	>
 		{formatDegrees(weather.temperature)}
 	</p>
+	<!-- The key sits just left of the location button: 12 + 42 = 54px from the edge. -->
+	<Legend
+		class="absolute top-[max(0.75rem,env(safe-area-inset-top))] right-9 @tablet:right-13 @desktop:right-17"
+	/>
 	<!-- The glyph's right edge lands on the gutter, in line with the time labels. -->
 	<button
 		type="button"
