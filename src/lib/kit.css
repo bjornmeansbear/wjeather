@@ -63,11 +63,15 @@
   --purple-3: rgb(199,178,209); --purple-4: rgb(165,143,175); --purple-5: rgb(130,106,141);
   --purple-6: rgb(94,73,103);   --purple-7: rgb(60,43,68);    --purple-8: rgb(29,16,35);
   --purple-9: rgb(11,3,15);
-  /* pink — the Wjerk accent, see RULES.md "Accent color" */
-  --pink-0: rgb(255,203,232); --pink-1: rgb(255,187,218); --pink-2: rgb(255,163,197);
-  --pink-3: rgb(255,129,169); --pink-4: rgb(250,81,134);  --pink-5: rgb(214,0,97);
-  --pink-6: rgb(164,0,65);    --pink-7: rgb(116,0,37);    --pink-8: rgb(69,0,11);
-  --pink-9: rgb(40,0,1);
+  /* pink — the Wjerk accent, see RULES.md "Accent color". Rebuilt 2026-09-11
+     at the original Wjerk Pink's softer chroma (#DB4F7A, OKLCH C 0.178 vs the
+     old scale's 0.226): same lightness and hue per step, dustier throughout.
+     The original sits between steps 4 and 5; pink-5 still carries small text
+     (4.78:1 on the White). */
+  --pink-0: rgb(248,207,230); --pink-1: rgb(246,192,216); --pink-2: rgb(243,171,197);
+  --pink-3: rgb(240,141,170); --pink-4: rgb(232,103,138); --pink-5: rgb(197,57,101);
+  --pink-6: rgb(150,41,70);   --pink-7: rgb(106,26,42);   --pink-8: rgb(62,12,16);
+  --pink-9: rgb(36,4,4);
   /* brown */
   --brown-0: rgb(251,245,242); --brown-1: rgb(238,232,229); --brown-2: rgb(219,212,209);
   --brown-3: rgb(192,185,181); --brown-4: rgb(158,151,147); --brown-5: rgb(122,115,111);

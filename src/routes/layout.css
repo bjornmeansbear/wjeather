@@ -30,13 +30,13 @@
 
 	/* Sky bands (see src/lib/sky.ts): one tint per sky. Measured against the
 	   kit's text (wjerk-black), gray-6 labels and the pink-5 line; the
-	   weakest, blue-2, is 10.05 / 5.37 / 3.60. */
+	   weakest, blue-2, is 10.05 / 5.37 / 3.50. */
 	--band-clear: var(--yellow-1);
 	--band-cloud: var(--gray-1);
 	--band-rain: var(--blue-2); /* a step deeper: lighter blues read as near-white; blue-3 fails (labels 4.05, line 2.71) */
 	--band-snow: var(--blue-0); /* icy near-white; purple-1 read as the pink accent */
 	/* Clear sky after dark: the deepest purple that still passes everything —
-	   number 9.79, labels 5.24, pink line 3.51, humidity line 3.05. */
+	   number 9.79, labels 5.24, pink line 3.41, humidity line 3.05. */
 	--band-night: var(--purple-2);
 	/* Stars on clear nights: the kit's lightest warm white. Texture, not text. */
 	--color-star: var(--brown-0);

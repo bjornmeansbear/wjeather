@@ -7,13 +7,24 @@
 	// Wind as etched line work, one patch per hour down the time axis.
 	//   angle   — the lines run along the wind, north up like a map
 	//   spacing — closer as the wind strengthens; calm air has no lines
-	// A plain line can't say which way along itself the wind blows — the
-	// drift, later, is what would add that.
+	// When the app opens or new weather arrives, each hour's lines drift the way
+	// that hour's wind blows, then settle still. The drift is what tells a
+	// north wind from a south one. It lasts under 5 s, so WCAG 2.2.2 needs no
+	// pause control, and it's skipped entirely under prefers-reduced-motion.
 	const CALM_KMH = 5;
 	const GALE_KMH = 60;
 	const WIDEST = 36; // px between lines at a light breeze (6 × 6)
 	const TIGHTEST = 6; // px at a gale
 	const INK = 0.3; // line opacity: present, but quieter than the number and labels
+
+	// Long dashes rather than solid lines: a solid line sliding along itself
+	// looks identical, so the drift would be invisible. On the 6px grid.
+	const DASH = 18;
+	const PERIOD = 24; // dash + gap
+
+	const DRIFT_MS = 4000;
+	const PX_PER_S_PER_KMH = 1.5; // a 10 km/h breeze leaves at 15 px/s (30 px in all); a gale at 90
+	const MIN_TRAVEL = 12; // px: even the lightest wind that draws lines visibly moves
 
 	function spacing(speed: number) {
 		if (speed < CALM_KMH) return 0;
@@ -29,9 +40,39 @@
 			top: y(h),
 			height: y(hours[i + 1]) - y(h),
 			spacing: spacing(h.windSpeed),
-			angle: h.windDirection % 180 // a line from the north runs the same as one from the south
+			speed: h.windSpeed,
+			// The pattern's lines run down its y axis; rotated by the direction
+			// mod 180, +y points where the wind goes for directions under 180°,
+			// and back where it came from otherwise — so flip the drift.
+			angle: h.windDirection % 180,
+			sign: h.windDirection % 360 < 180 ? 1 : -1
 		}));
 	});
+
+	let progress = $state(1); // 0 → 1 across the drift; 1 is settled
+
+	$effect(() => {
+		void weather.next12h; // drift again whenever new weather arrives
+		if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+		progress = 0;
+		const start = performance.now();
+		let frame = requestAnimationFrame(function step(now) {
+			progress = Math.min(1, (now - start) / DRIFT_MS);
+			if (progress < 1) frame = requestAnimationFrame(step);
+		});
+		return () => cancelAnimationFrame(frame);
+	});
+
+	// Quadratic ease-out: leaves at the wind's speed, slows to rest at 0, so the
+	// settled lines sit exactly where they would with no motion at all.
+	function offset(speed: number, sign: number) {
+		const travel = Math.max(MIN_TRAVEL, (speed * PX_PER_S_PER_KMH * DRIFT_MS) / 1000 / 2);
+		return sign * travel * ((1 - (1 - progress) ** 2) - 1);
+	}
+
+	// Two staggered dashes per tile, so neighbouring lines don't line up in rows.
+	const dashes = (s: number) =>
+		`M${s / 2} 0V${DASH} M${s * 1.5} ${PERIOD / 2}V${PERIOD} M${s * 1.5} 0V${PERIOD / 2 + DASH - PERIOD}`;
 
 	const COMPASS = ['north', 'northeast', 'east', 'southeast', 'south', 'southwest', 'west', 'northwest'];
 	const summary = $derived.by(() => {
@@ -50,19 +91,12 @@
 			{#if band.spacing}
 				<pattern
 					id="{uid}-wind-{i}"
-					width={band.spacing}
-					height={band.spacing}
+					width={band.spacing * 2}
+					height={PERIOD}
 					patternUnits="userSpaceOnUse"
-					patternTransform="rotate({band.angle})"
+					patternTransform="rotate({band.angle}) translate(0 {offset(band.speed, band.sign)})"
 				>
-					<line
-						x1={band.spacing / 2}
-						y1="0"
-						x2={band.spacing / 2}
-						y2={band.spacing}
-						class="stroke-text"
-						stroke-width="1"
-					/>
+					<path d={dashes(band.spacing)} class="stroke-text" stroke-width="1" fill="none" />
 				</pattern>
 			{/if}
 		{/each}
