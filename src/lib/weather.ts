@@ -1,5 +1,6 @@
-// Open-Meteo: free, no key. Attribution required (CC BY 4.0) — see the page footer.
+// Open-Meteo: free, no key. Attribution required (CC BY 4.0) — credited in the README.
 // https://open-meteo.com/en/docs
+// Fetches only what the screen draws: don't take what you don't use.
 
 export type Place = { latitude: number; longitude: number; name?: string };
 export type Unit = 'fahrenheit' | 'celsius';
@@ -8,8 +9,6 @@ export type Hour = {
 	time: number; // unix seconds
 	temperature: number;
 	cloudCover: number; // %
-	precipitation: number; // mm over the preceding hour (the current reading: preceding 15 min)
-	pressure: number; // hPa, sea level
 	code: number; // WMO weather code
 	windSpeed: number; // km/h at 10 m
 	windDirection: number; // degrees the wind comes from (0 = north)
@@ -20,10 +19,6 @@ export type Hour = {
 export type Weather = {
 	temperature: number;
 	unit: Unit;
-	code: number; // WMO weather code
-	isDay: boolean;
-	high: number;
-	low: number;
 	timezone: string; // IANA zone of the place, for formatting its times
 	utcOffsetSeconds: number; // the place's offset from UTC, for finding its clock hours
 	// Now → now + 12 hours. The first point is the current reading, the last is
@@ -31,34 +26,23 @@ export type Weather = {
 	next12h: Hour[];
 };
 
+const FIELDS = 'temperature_2m,weather_code,is_day,cloud_cover,wind_speed_10m,wind_direction_10m,relative_humidity_2m';
+
+type Readings<T> = {
+	temperature_2m: T;
+	weather_code: T;
+	is_day: T;
+	cloud_cover: T;
+	wind_speed_10m: T;
+	wind_direction_10m: T;
+	relative_humidity_2m: T;
+};
+
 type ForecastResponse = {
 	timezone: string;
 	utc_offset_seconds: number;
-	current: {
-		time: number;
-		temperature_2m: number;
-		weather_code: number;
-		is_day: 0 | 1;
-		cloud_cover: number;
-		precipitation: number;
-		pressure_msl: number;
-		wind_speed_10m: number;
-		wind_direction_10m: number;
-		relative_humidity_2m: number;
-	};
-	hourly: {
-		time: number[];
-		temperature_2m: number[];
-		weather_code: number[];
-		cloud_cover: number[];
-		precipitation: number[];
-		pressure_msl: number[];
-		wind_speed_10m: number[];
-		wind_direction_10m: number[];
-		relative_humidity_2m: number[];
-		is_day: (0 | 1)[];
-	};
-	daily: { temperature_2m_max: number[]; temperature_2m_min: number[] };
+	current: { time: number } & Readings<number>;
+	hourly: { time: number[] } & Readings<number[]>;
 };
 
 export const HORIZON_SECONDS = 12 * 60 * 60;
@@ -71,8 +55,6 @@ function next12Hours({ current, hourly }: ForecastResponse): Hour[] {
 			time: start,
 			temperature: current.temperature_2m,
 			cloudCover: current.cloud_cover,
-			precipitation: current.precipitation,
-			pressure: current.pressure_msl,
 			code: current.weather_code,
 			windSpeed: current.wind_speed_10m,
 			windDirection: current.wind_direction_10m,
@@ -85,8 +67,6 @@ function next12Hours({ current, hourly }: ForecastResponse): Hour[] {
 			time: hourly.time[i],
 			temperature: hourly.temperature_2m[i],
 			cloudCover: hourly.cloud_cover[i],
-			precipitation: hourly.precipitation[i],
-			pressure: hourly.pressure_msl[i],
 			code: hourly.weather_code[i],
 			windSpeed: hourly.wind_speed_10m[i],
 			windDirection: hourly.wind_direction_10m[i],
@@ -102,8 +82,6 @@ function next12Hours({ current, hourly }: ForecastResponse): Hour[] {
 				time: end,
 				temperature: lerp(prev.temperature, hour.temperature),
 				cloudCover: lerp(prev.cloudCover, hour.cloudCover),
-				precipitation: lerp(prev.precipitation, hour.precipitation),
-				pressure: lerp(prev.pressure, hour.pressure),
 				code: prev.code,
 				windSpeed: lerp(prev.windSpeed, hour.windSpeed),
 				windDirection: prev.windDirection, // compass degrees wrap; don't average them
@@ -134,14 +112,10 @@ export async function getWeather(place: Place, unit: Unit): Promise<Weather> {
 	const params = new URLSearchParams({
 		latitude: String(place.latitude),
 		longitude: String(place.longitude),
-		current:
-			'temperature_2m,weather_code,is_day,cloud_cover,precipitation,pressure_msl,wind_speed_10m,wind_direction_10m,relative_humidity_2m',
-		hourly:
-			'temperature_2m,weather_code,is_day,cloud_cover,precipitation,pressure_msl,wind_speed_10m,wind_direction_10m,relative_humidity_2m',
-		daily: 'temperature_2m_max,temperature_2m_min',
+		current: FIELDS,
+		hourly: FIELDS,
 		timezone: 'auto',
 		timeformat: 'unixtime',
-		forecast_days: '1',
 		forecast_hours: '14', // starts at the current hour; covers now + 12h
 		temperature_unit: unit
 	});
@@ -151,10 +125,6 @@ export async function getWeather(place: Place, unit: Unit): Promise<Weather> {
 	return {
 		temperature: data.current.temperature_2m,
 		unit,
-		code: data.current.weather_code,
-		isDay: data.current.is_day === 1,
-		high: data.daily.temperature_2m_max[0],
-		low: data.daily.temperature_2m_min[0],
 		timezone: data.timezone,
 		utcOffsetSeconds: data.utc_offset_seconds,
 		next12h: next12Hours(data)
@@ -210,7 +180,9 @@ export function currentPosition(): Promise<Place> {
 							: 'Couldn’t get your location. Type a city instead.'
 					)
 				),
-			{ maximumAge: 10 * 60 * 1000, timeout: 10_000 }
+			// Reuse a fix up to an hour old: a GPS fix costs more battery than the
+			// weather request, and you don't move far between glances.
+			{ maximumAge: 60 * 60 * 1000, timeout: 10_000 }
 		);
 	});
 }

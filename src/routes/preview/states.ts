@@ -7,8 +7,6 @@ type Series = {
 	temps: number[];
 	humidity?: number[]; // %
 	cloud: number[];
-	precip?: number[];
-	pressure?: number[];
 	codes: number[];
 	wind?: number[]; // km/h
 	dir?: number[]; // degrees the wind comes from
@@ -25,8 +23,6 @@ function weather({
 	temps,
 	humidity = [60],
 	cloud,
-	precip = [0],
-	pressure = [1013],
 	codes,
 	wind = [0],
 	dir = [270]
@@ -38,21 +34,14 @@ function weather({
 		isDay: isDaytime(startHour + i),
 		temperature: at(temps, i),
 		cloudCover: at(cloud, i),
-		precipitation: at(precip, i),
-		pressure: at(pressure, i),
 		code: at(codes, i),
 		windSpeed: at(wind, i),
 		windDirection: at(dir, i),
 		humidity: at(humidity, i)
 	}));
-	const all = next12h.map((h) => h.temperature);
 	return {
 		temperature: next12h[0].temperature,
 		unit: 'celsius',
-		code: next12h[0].code,
-		isDay: false,
-		high: Math.max(...all),
-		low: Math.min(...all),
 		timezone: 'UTC',
 		utcOffsetSeconds: 0,
 		next12h
@@ -87,7 +76,6 @@ export const states: { name: string; weather: Weather }[] = [
 			temps: ramp(14, 19),
 			humidity: ramp(96, 62),
 			cloud: ramp(100, 0),
-			precip: [2, 1, 0.3, 0],
 			codes: [63, 61, 61, 3, 3, 3, 2, 2, 1, 1, 0],
 			wind: ramp(38, 10),
 			dir: ramp(200, 300)
@@ -99,7 +87,6 @@ export const states: { name: string; weather: Weather }[] = [
 			temps: ramp(22, 16),
 			humidity: ramp(52, 97),
 			cloud: ramp(10, 100),
-			precip: [0, 0, 0, 0, 0, 0, 0, 0.2, 1, 2, 3, 3, 3],
 			codes: [0, 1, 1, 2, 2, 3, 3, 61, 63, 63, 65, 65, 63],
 			wind: ramp(6, 45),
 			dir: ramp(120, 170)
@@ -155,7 +142,6 @@ export const states: { name: string; weather: Weather }[] = [
 			temps: [29, 28, 28, 27, 27, 26, 26, 25, 24, 24, 25, 26, 27],
 			humidity: [70, 72, 72, 76, 76, 80, 80, 84, 95, 97, 94, 88, 82],
 			cloud: ramp(30, 100),
-			precip: [0, 0, 0, 0, 0, 0, 0, 8, 12, 4, 1, 0, 0],
 			codes: [1, 2, 2, 2, 3, 3, 3, 95, 95, 63, 61, 3, 3],
 			wind: [8, 8, 10, 12, 14, 20, 28, 35, 30, 20, 15, 12, 10],
 			dir: [180, 180, 190, 200, 210, 230, 250, 270, 280, 290, 290, 290, 290]

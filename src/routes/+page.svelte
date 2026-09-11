@@ -13,12 +13,22 @@
 		type Weather
 	} from '$lib/weather';
 
-	type Saved = { source: 'location' } | { source: 'city'; place: Place };
+	type Source = 'location' | 'city';
+	// Coordinates are kept for both sources, so reopening never lands on the
+	// location screen just because iOS forgot the permission.
+	type Saved = { source: Source; place?: Place };
 	const STORAGE_KEY = 'wjeather:place';
+
+	// Open-Meteo's current conditions update every 15 minutes; fetching more
+	// often gains nothing. Refreshes happen only when the app comes back into
+	// view (opening it, or switching to it) with data older than this.
+	const STALE_MS = 15 * 60 * 1000;
 
 	let status = $state<'starting' | 'ask' | 'loading' | 'ready'>('starting');
 	let weather = $state<Weather | null>(null);
 	let place = $state<Place | null>(null);
+	let source = $state<Source>('city');
+	let fetchedAt = 0;
 	let error = $state('');
 	let city = $state('');
 
@@ -41,14 +51,16 @@
 		}
 	}
 
-	async function show(getPlace: () => Promise<Place>, toSaved: (p: Place) => Saved) {
+	async function show(getPlace: () => Promise<Place>, from: Source) {
 		status = 'loading';
 		error = '';
 		try {
 			const p = await getPlace();
 			weather = await getWeather(p, DEFAULT_UNIT);
+			fetchedAt = Date.now();
 			place = p;
-			save(toSaved(p));
+			source = from;
+			save({ source: from, place: p });
 			status = 'ready';
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Something went wrong. Try again.';
@@ -56,14 +68,29 @@
 		}
 	}
 
+	// Quietly re-fetch for the same place: no loading screen, and a failure
+	// leaves what's on screen. Follows you only if location is already allowed.
+	async function refresh(force = false) {
+		if (status !== 'ready' || !place) return;
+		if (!force && Date.now() - fetchedAt < STALE_MS) return;
+		try {
+			const p = source === 'location' && (await locationAllowed()) ? await currentPosition() : place;
+			const w = await getWeather(p, DEFAULT_UNIT);
+			weather = w;
+			place = p;
+			fetchedAt = Date.now();
+			save({ source, place: p });
+		} catch {}
+	}
+
 	function useLocation() {
-		show(currentPosition, () => ({ source: 'location' }));
+		show(currentPosition, 'location');
 	}
 
 	function useCity(event: SubmitEvent) {
 		event.preventDefault();
 		const query = city.trim();
-		if (query) show(() => findCity(query), (p) => ({ source: 'city', place: p }));
+		if (query) show(() => findCity(query), 'city');
 	}
 
 	function changeLocation() {
@@ -72,15 +99,28 @@
 		status = 'ask';
 	}
 
-	onMount(async () => {
+	async function start() {
 		const saved = load();
-		if (saved?.source === 'city') {
-			show(async () => saved.place, () => saved);
+		if (saved?.place) {
+			const last = saved.place;
+			await show(async () => last, saved.source);
+			// Showing the last place is instant; then catch up to where you are now.
+			if (saved.source === 'location') refresh(true);
 		} else if (saved?.source === 'location' && (await locationAllowed())) {
-			useLocation();
+			useLocation(); // saved before coordinates were kept
 		} else {
 			status = 'ask';
 		}
+	}
+
+	onMount(() => {
+		start();
+		// A home-screen app stays in memory, so coming back doesn't reload the page.
+		const onVisible = () => {
+			if (document.visibilityState === 'visible') refresh();
+		};
+		document.addEventListener('visibilitychange', onVisible);
+		return () => document.removeEventListener('visibilitychange', onVisible);
 	});
 </script>
 
