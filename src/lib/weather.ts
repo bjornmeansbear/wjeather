@@ -8,7 +8,6 @@ export type Unit = 'fahrenheit' | 'celsius';
 export type Hour = {
 	time: number; // unix seconds
 	temperature: number;
-	cloudCover: number; // %
 	code: number; // WMO weather code
 	windSpeed: number; // km/h at 10 m
 	windDirection: number; // degrees the wind comes from (0 = north)
@@ -26,13 +25,12 @@ export type Weather = {
 	next12h: Hour[];
 };
 
-const FIELDS = 'temperature_2m,weather_code,is_day,cloud_cover,wind_speed_10m,wind_direction_10m,relative_humidity_2m';
+const FIELDS = 'temperature_2m,weather_code,is_day,wind_speed_10m,wind_direction_10m,relative_humidity_2m';
 
 type Readings<T> = {
 	temperature_2m: T;
 	weather_code: T;
 	is_day: T;
-	cloud_cover: T;
 	wind_speed_10m: T;
 	wind_direction_10m: T;
 	relative_humidity_2m: T;
@@ -54,7 +52,6 @@ function next12Hours({ current, hourly }: ForecastResponse): Hour[] {
 		{
 			time: start,
 			temperature: current.temperature_2m,
-			cloudCover: current.cloud_cover,
 			code: current.weather_code,
 			windSpeed: current.wind_speed_10m,
 			windDirection: current.wind_direction_10m,
@@ -66,7 +63,6 @@ function next12Hours({ current, hourly }: ForecastResponse): Hour[] {
 		const hour: Hour = {
 			time: hourly.time[i],
 			temperature: hourly.temperature_2m[i],
-			cloudCover: hourly.cloud_cover[i],
 			code: hourly.weather_code[i],
 			windSpeed: hourly.wind_speed_10m[i],
 			windDirection: hourly.wind_direction_10m[i],
@@ -81,7 +77,6 @@ function next12Hours({ current, hourly }: ForecastResponse): Hour[] {
 			hours.push({
 				time: end,
 				temperature: lerp(prev.temperature, hour.temperature),
-				cloudCover: lerp(prev.cloudCover, hour.cloudCover),
 				code: prev.code,
 				windSpeed: lerp(prev.windSpeed, hour.windSpeed),
 				windDirection: prev.windDirection, // compass degrees wrap; don't average them

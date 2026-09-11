@@ -33,6 +33,10 @@
 	   weakest, blue-2, is 10.05 / 5.37 / 3.50. */
 	--band-clear: var(--yellow-1);
 	--band-cloud: var(--gray-1);
+	/* Cloud after dark: the same gray tilted purple — a sibling of the day
+	   cloud (ΔE 4.2) but well clear of the night sky (7.1) and rain (7.4).
+	   Number 12.16, labels 6.50, pink line 4.23, humidity line 3.79. */
+	--band-cloud-night: var(--purple-gray-1);
 	--band-rain: var(--blue-2); /* a step deeper: lighter blues read as near-white; blue-3 fails (labels 4.05, line 2.71) */
 	--band-snow: var(--blue-0); /* icy near-white; purple-1 read as the pink accent */
 	/* Clear sky after dark: the deepest purple that still passes everything —
@@ -63,6 +67,7 @@
 		   pink-3 line; the weakest, blue-7, is 11.68 / 6.51 / 5.38. */
 		--band-clear: var(--yellow-8);
 		--band-cloud: var(--gray-8);
+		--band-cloud-night: var(--purple-gray-8); /* 16.80 / 9.37 / 7.86 / 9.61 */
 		--band-rain: var(--blue-7);
 		--band-snow: var(--dark-gray-7); /* cool, icy gray */
 		--band-night: var(--purple-9); /* stars on it: 18.84:1 */

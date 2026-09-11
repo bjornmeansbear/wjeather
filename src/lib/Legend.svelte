@@ -9,6 +9,7 @@
 		{ token: '--band-clear', label: 'Clear', stars: false },
 		{ token: '--band-night', label: 'Clear night', stars: true },
 		{ token: '--band-cloud', label: 'Cloudy', stars: false },
+		{ token: '--band-cloud-night', label: 'Cloudy night', stars: false },
 		{ token: '--band-rain', label: 'Rain', stars: false },
 		{ token: '--band-snow', label: 'Snow', stars: false }
 	];
@@ -72,7 +73,7 @@
 
 			<li>
 				<span class="mb-2 block">The sky, hour by hour:</span>
-				<div class="grid grid-cols-5 gap-2">
+				<div class="grid grid-cols-3 gap-2">
 					{#each skies as sky (sky.token)}
 						<div>
 							<div class="relative h-4 border border-border" style:background="var({sky.token})">
@@ -88,20 +89,6 @@
 						</div>
 					{/each}
 				</div>
-			</li>
-
-			<li class="flex items-center gap-3">
-				<div class="flex shrink-0 gap-1" aria-hidden="true">
-					<div
-						class="h-4 w-4 border border-border"
-						style:background="linear-gradient(to right, var(--band-clear) 50%, var(--band-cloud) 50%)"
-					></div>
-					<div
-						class="h-4 w-4 border border-border"
-						style:background="linear-gradient(in oklab to right, var(--band-clear), var(--band-cloud))"
-					></div>
-				</div>
-				<span>A hard edge between hours means clear skies; a soft one, cloud.</span>
 			</li>
 
 			<li class="flex items-center gap-3">

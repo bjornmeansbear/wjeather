@@ -6,7 +6,6 @@ type Series = {
 	startHour?: number; // the hour "now" falls on, labelled in UTC; default 9 PM
 	temps: number[];
 	humidity?: number[]; // %
-	cloud: number[];
 	codes: number[];
 	wind?: number[]; // km/h
 	dir?: number[]; // degrees the wind comes from
@@ -22,7 +21,6 @@ function weather({
 	startHour = 21,
 	temps,
 	humidity = [60],
-	cloud,
 	codes,
 	wind = [0],
 	dir = [270]
@@ -33,7 +31,6 @@ function weather({
 		time: start + i * 3600,
 		isDay: isDaytime(startHour + i),
 		temperature: at(temps, i),
-		cloudCover: at(cloud, i),
 		code: at(codes, i),
 		windSpeed: at(wind, i),
 		windDirection: at(dir, i),
@@ -54,7 +51,6 @@ export const states: { name: string; weather: Weather }[] = [
 		weather: weather({
 			temps: [24, 22, 21, 20, 19, 18, 17, 17, 16, 18, 21, 24, 26],
 			humidity: [45, 52, 56, 60, 64, 68, 72, 72, 76, 68, 58, 50, 45],
-			cloud: [0],
 			codes: [0],
 			wind: [2]
 		})
@@ -64,7 +60,6 @@ export const states: { name: string; weather: Weather }[] = [
 		weather: weather({
 			temps: ramp(18, 15),
 			humidity: ramp(78, 86),
-			cloud: [100],
 			codes: [3],
 			wind: [9],
 			dir: [0]
@@ -75,7 +70,6 @@ export const states: { name: string; weather: Weather }[] = [
 		weather: weather({
 			temps: ramp(14, 19),
 			humidity: ramp(96, 62),
-			cloud: ramp(100, 0),
 			codes: [63, 61, 61, 3, 3, 3, 2, 2, 1, 1, 0],
 			wind: ramp(38, 10),
 			dir: ramp(200, 300)
@@ -86,7 +80,6 @@ export const states: { name: string; weather: Weather }[] = [
 		weather: weather({
 			temps: ramp(22, 16),
 			humidity: ramp(52, 97),
-			cloud: ramp(10, 100),
 			codes: [0, 1, 1, 2, 2, 3, 3, 61, 63, 63, 65, 65, 63],
 			wind: ramp(6, 45),
 			dir: ramp(120, 170)
@@ -97,7 +90,6 @@ export const states: { name: string; weather: Weather }[] = [
 		weather: weather({
 			temps: ramp(-2, -7),
 			humidity: [88, 90, 92, 92, 93],
-			cloud: [100, 100, 95, 100],
 			codes: [71, 73, 73, 75, 75, 73, 71],
 			wind: [25, 28, 32, 30, 26],
 			dir: [40]
@@ -108,7 +100,6 @@ export const states: { name: string; weather: Weather }[] = [
 		weather: weather({
 			temps: [19, 18, 20, 17, 16, 19, 21, 18, 17, 20, 22, 21, 20],
 			humidity: [60, 62, 70, 88, 90, 72, 58, 80, 92, 74, 60, 55, 52],
-			cloud: [20, 30, 60, 90, 90, 50, 20, 70, 95, 60, 25, 15, 10],
 			codes: [1, 2, 2, 80, 80, 2, 1, 3, 81, 2, 1, 1, 1],
 			wind: [18, 22, 30, 42, 40, 24, 20, 34, 48, 28, 20, 16, 14],
 			dir: [265, 270, 275, 285, 290, 280, 270, 280, 295, 285, 275, 270, 265]
@@ -119,7 +110,6 @@ export const states: { name: string; weather: Weather }[] = [
 		weather: weather({
 			temps: [13, 12, 11.5, 11, 10.5, 10, 9.5, 9, 9, 9, 9.5, 11, 13],
 			humidity: [76, 80, 83, 86, 89, 93, 97, 100, 100, 100, 96, 86, 75],
-			cloud: [0, 5, 10, 20, 40, 100, 100, 100, 100, 100, 80, 40, 20],
 			codes: [0, 0, 1, 1, 2, 45, 45, 45, 45, 45, 3, 2, 1],
 			wind: [3]
 		})
@@ -130,7 +120,6 @@ export const states: { name: string; weather: Weather }[] = [
 			startHour: 15,
 			temps: [40, 40, 39, 37, 35, 33, 31, 30, 29, 28, 27, 26, 25],
 			humidity: [8, 8, 9, 10, 12, 14, 16, 18, 19, 20, 21, 22, 22],
-			cloud: [0],
 			codes: [0],
 			wind: [12],
 			dir: [200]
@@ -141,7 +130,6 @@ export const states: { name: string; weather: Weather }[] = [
 		weather: weather({
 			temps: [29, 28, 28, 27, 27, 26, 26, 25, 24, 24, 25, 26, 27],
 			humidity: [70, 72, 72, 76, 76, 80, 80, 84, 95, 97, 94, 88, 82],
-			cloud: ramp(30, 100),
 			codes: [1, 2, 2, 2, 3, 3, 3, 95, 95, 63, 61, 3, 3],
 			wind: [8, 8, 10, 12, 14, 20, 28, 35, 30, 20, 15, 12, 10],
 			dir: [180, 180, 190, 200, 210, 230, 250, 270, 280, 290, 290, 290, 290]
