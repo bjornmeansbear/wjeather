@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { HORIZON_SECONDS, type Weather } from '$lib/weather';
+	import { formatDegrees, HORIZON_SECONDS, type Weather } from '$lib/weather';
 
 	let { weather }: { weather: Weather } = $props();
 
@@ -91,10 +91,7 @@
 		return out;
 	});
 
-	const label = (c: number) => {
-		const t = Math.round(fromCelsius(c));
-		return `${t < 0 ? '−' : ''}${Math.abs(t)}°`;
-	};
+	const label = (c: number) => formatDegrees(fromCelsius(c));
 
 	// The line is decorative to a screen reader; this says what it shows.
 	const summary = $derived.by(() => {
@@ -111,7 +108,7 @@
 <p class="sr-only">{summary}</p>
 
 <!-- Inset to the same gutters as the footer rule, so the axis edges line up with it. -->
-<div class="absolute inset-y-0 right-4 left-4 tablet:right-8 tablet:left-8 desktop:right-12 desktop:left-12">
+<div class="absolute inset-y-0 right-4 left-4 @tablet:right-8 @tablet:left-8 @desktop:right-12 @desktop:left-12">
 	<svg
 		class="absolute inset-0 h-full w-full overflow-visible"
 		viewBox="0 0 100 100"

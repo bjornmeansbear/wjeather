@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import ForecastLine from '$lib/ForecastLine.svelte';
+	import WeatherScreen from '$lib/WeatherScreen.svelte';
 	import {
 		currentPosition,
+		describeTemperature,
 		findCity,
+		formatDegrees,
 		getWeather,
 		locationAllowed,
 		DEFAULT_UNIT,
@@ -20,14 +22,8 @@
 	let error = $state('');
 	let city = $state('');
 
-	const degrees = $derived(weather ? Math.round(weather.temperature) : 0);
-	// A true minus sign, not a hyphen.
-	const display = $derived(`${degrees < 0 ? '−' : ''}${Math.abs(degrees)}°`);
-	const spoken = $derived(
-		weather
-			? `${degrees} degrees ${weather.unit === 'fahrenheit' ? 'Fahrenheit' : 'Celsius'}${place?.name ? ` in ${place.name}` : ''}`
-			: ''
-	);
+	const display = $derived(weather ? formatDegrees(weather.temperature) : '');
+	const spoken = $derived(weather ? describeTemperature(weather, place?.name) : '');
 
 	function save(saved: Saved | null) {
 		try {
@@ -98,29 +94,7 @@
 
 {#if status === 'ready' && weather}
 	<main class="flex min-h-dvh flex-col">
-		<h1 class="sr-only">{spoken}</h1>
-		<!-- The graph fills this area: its top edge is now, the footer rule is +12 hours. -->
-		<div class="relative flex-1">
-			<ForecastLine {weather} />
-			<p
-				class="relative m-0 px-4 pt-4 font-display text-display font-bold whitespace-nowrap tablet:px-8 desktop:px-12"
-				aria-hidden="true"
-			>
-				{display}
-			</p>
-		</div>
-		<footer
-			class="mx-4 flex flex-wrap items-center justify-between gap-x-4 border-t border-border py-2 text-2xs text-text-muted tablet:mx-8 desktop:mx-12"
-		>
-			<button
-				type="button"
-				class="inline-flex min-h-4 cursor-pointer items-center underline underline-offset-4"
-				onclick={changeLocation}
-			>
-				Change location
-			</button>
-			<!-- Weather data by Open-Meteo.com (CC BY 4.0) — credited in the README, not on screen. -->
-		</footer>
+		<WeatherScreen {weather} placeName={place?.name} onChangeLocation={changeLocation} />
 	</main>
 {:else if status !== 'starting'}
 	<main class="flex min-h-dvh flex-col justify-center px-4 py-8 tablet:px-8">

@@ -20,22 +20,21 @@
    inside the gutters at the breakpoint's narrowest width. */
 :root {
 	--font-display: 'Basteleur', var(--font-sans);
-	--text-display: 8rem; /* 128 */
-	--leading-display: 7.125rem; /* 114 = 19 × 6 */
-}
+	/* Applied per container width (@tablet / @desktop) in WeatherScreen. */
+	--text-display-sm: 8rem; /* 128 */
+	--leading-display-sm: 7.125rem; /* 114 = 19 × 6 */
+	--text-display-md: 13rem; /* 208 */
+	--leading-display-md: 11.625rem; /* 186 = 31 × 6 */
+	--text-display-lg: 17.5rem; /* 280 */
+	--leading-display-lg: 15.75rem; /* 252 = 42 × 6 */
 
-@media (min-width: 40rem) {
-	:root {
-		--text-display: 13rem; /* 208 */
-		--leading-display: 11.625rem; /* 186 = 31 × 6 */
-	}
-}
-
-@media (min-width: 55rem) {
-	:root {
-		--text-display: 17.5rem; /* 280 */
-		--leading-display: 15.75rem; /* 252 = 42 × 6 */
-	}
+	/* Sky bands (see src/lib/sky.ts): one tint per sky. Measured against
+	   brown-8 text, gray-6 labels and the pink-5 line; the weakest, blue-2,
+	   is 12.52 / 5.37 / 3.60. */
+	--band-clear: var(--yellow-1);
+	--band-cloud: var(--gray-1);
+	--band-rain: var(--blue-2); /* a step deeper: lighter blues read as near-white; blue-3 fails (labels 4.05, line 2.71) */
+	--band-snow: var(--purple-1);
 }
 
 /* Dark mode — the measured mapping from RULES.md "Dark mode". */
@@ -50,6 +49,13 @@
 		--color-text-subtle: var(--brown-4); /* 7.06:1 */
 		--color-accent: var(--pink-3); /* 8.67:1 */
 		--color-accent-hover: var(--pink-2); /* brown-9 on pink-2: 10.93:1 */
+
+		/* Sky bands, measured against brown-0 text, brown-3 labels and the
+		   pink-3 line; the weakest, blue-7, is 11.68 / 6.51 / 5.38. */
+		--band-clear: var(--yellow-8);
+		--band-cloud: var(--gray-8);
+		--band-rain: var(--blue-7);
+		--band-snow: var(--purple-8);
 	}
 }
 
@@ -63,6 +69,10 @@
 
 	--breakpoint-tablet: 40rem;
 	--breakpoint-desktop: 55rem;
+
+	/* The same two widths as container queries: @tablet: / @desktop: */
+	--container-tablet: 40rem;
+	--container-desktop: 55rem;
 
 	/* p-1 = 6px, p-4 = 24px: spacing rides the same rhythm as the type. */
 	--spacing: 0.375rem;
@@ -99,6 +109,10 @@
 	--text-2xl--line-height: var(--leading-2xl);
 	--text-3xl: var(--text-3xl);
 	--text-3xl--line-height: var(--leading-3xl);
-	--text-display: var(--text-display);
-	--text-display--line-height: var(--leading-display);
+	--text-display-sm: var(--text-display-sm);
+	--text-display-sm--line-height: var(--leading-display-sm);
+	--text-display-md: var(--text-display-md);
+	--text-display-md--line-height: var(--leading-display-md);
+	--text-display-lg: var(--text-display-lg);
+	--text-display-lg--line-height: var(--leading-display-lg);
 }
