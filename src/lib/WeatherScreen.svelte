@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ForecastLine from '$lib/ForecastLine.svelte';
 	import SkyBands from '$lib/SkyBands.svelte';
+	import Stars from '$lib/Stars.svelte';
 	import WindHatch from '$lib/WindHatch.svelte';
 	import { describeTemperature, formatDegrees, type Weather } from '$lib/weather';
 
@@ -17,6 +18,7 @@
 <div class="relative @container flex flex-1 flex-col overflow-hidden">
 	<h1 class="sr-only">{describeTemperature(weather, placeName)}</h1>
 	<SkyBands {weather} />
+	<Stars {weather} />
 	<WindHatch {weather} />
 	<ForecastLine {weather} />
 	<p

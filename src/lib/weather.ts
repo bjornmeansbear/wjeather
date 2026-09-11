@@ -13,7 +13,8 @@ export type Hour = {
 	code: number; // WMO weather code
 	windSpeed: number; // km/h at 10 m
 	windDirection: number; // degrees the wind comes from (0 = north)
-	dewPoint: number; // same unit as temperature
+	humidity: number; // relative humidity, %
+	isDay: boolean; // sun above the horizon at this hour
 };
 
 export type Weather = {
@@ -28,9 +29,6 @@ export type Weather = {
 	// Now → now + 12 hours. The first point is the current reading, the last is
 	// interpolated to land exactly on +12 hours. `time` is unix seconds.
 	next12h: Hour[];
-	// Lowest and highest over the next 48 hours — the context the 12-hour
-	// line is scaled against, so a calm night doesn't fill the screen.
-	range48h: { min: number; max: number; dewPointMin: number };
 };
 
 type ForecastResponse = {
@@ -46,7 +44,7 @@ type ForecastResponse = {
 		pressure_msl: number;
 		wind_speed_10m: number;
 		wind_direction_10m: number;
-		dew_point_2m: number;
+		relative_humidity_2m: number;
 	};
 	hourly: {
 		time: number[];
@@ -57,7 +55,8 @@ type ForecastResponse = {
 		pressure_msl: number[];
 		wind_speed_10m: number[];
 		wind_direction_10m: number[];
-		dew_point_2m: number[];
+		relative_humidity_2m: number[];
+		is_day: (0 | 1)[];
 	};
 	daily: { temperature_2m_max: number[]; temperature_2m_min: number[] };
 };
@@ -77,7 +76,8 @@ function next12Hours({ current, hourly }: ForecastResponse): Hour[] {
 			code: current.weather_code,
 			windSpeed: current.wind_speed_10m,
 			windDirection: current.wind_direction_10m,
-			dewPoint: current.dew_point_2m
+			humidity: current.relative_humidity_2m,
+			isDay: current.is_day === 1
 		}
 	];
 	for (let i = 0; i < hourly.time.length; i++) {
@@ -90,7 +90,8 @@ function next12Hours({ current, hourly }: ForecastResponse): Hour[] {
 			code: hourly.weather_code[i],
 			windSpeed: hourly.wind_speed_10m[i],
 			windDirection: hourly.wind_direction_10m[i],
-			dewPoint: hourly.dew_point_2m[i]
+			humidity: hourly.relative_humidity_2m[i],
+			isDay: hourly.is_day[i] === 1
 		};
 		if (hour.time <= start) continue;
 		if (hour.time >= end) {
@@ -106,7 +107,8 @@ function next12Hours({ current, hourly }: ForecastResponse): Hour[] {
 				code: prev.code,
 				windSpeed: lerp(prev.windSpeed, hour.windSpeed),
 				windDirection: prev.windDirection, // compass degrees wrap; don't average them
-				dewPoint: lerp(prev.dewPoint, hour.dewPoint)
+				humidity: lerp(prev.humidity, hour.humidity),
+				isDay: prev.isDay
 			});
 			break;
 		}
@@ -133,14 +135,14 @@ export async function getWeather(place: Place, unit: Unit): Promise<Weather> {
 		latitude: String(place.latitude),
 		longitude: String(place.longitude),
 		current:
-			'temperature_2m,weather_code,is_day,cloud_cover,precipitation,pressure_msl,wind_speed_10m,wind_direction_10m,dew_point_2m',
+			'temperature_2m,weather_code,is_day,cloud_cover,precipitation,pressure_msl,wind_speed_10m,wind_direction_10m,relative_humidity_2m',
 		hourly:
-			'temperature_2m,weather_code,cloud_cover,precipitation,pressure_msl,wind_speed_10m,wind_direction_10m,dew_point_2m',
+			'temperature_2m,weather_code,is_day,cloud_cover,precipitation,pressure_msl,wind_speed_10m,wind_direction_10m,relative_humidity_2m',
 		daily: 'temperature_2m_max,temperature_2m_min',
 		timezone: 'auto',
 		timeformat: 'unixtime',
 		forecast_days: '1',
-		forecast_hours: '49', // starts at the current hour; covers now + 48h
+		forecast_hours: '14', // starts at the current hour; covers now + 12h
 		temperature_unit: unit
 	});
 	const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
@@ -155,12 +157,7 @@ export async function getWeather(place: Place, unit: Unit): Promise<Weather> {
 		low: data.daily.temperature_2m_min[0],
 		timezone: data.timezone,
 		utcOffsetSeconds: data.utc_offset_seconds,
-		next12h: next12Hours(data),
-		range48h: {
-			min: Math.min(data.current.temperature_2m, ...data.hourly.temperature_2m),
-			max: Math.max(data.current.temperature_2m, ...data.hourly.temperature_2m),
-			dewPointMin: Math.min(data.current.dew_point_2m, ...data.hourly.dew_point_2m)
-		}
+		next12h: next12Hours(data)
 	};
 }
 

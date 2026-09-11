@@ -4,24 +4,27 @@
 	let { weather }: { weather: Weather } = $props();
 
 	// x is temperature, y is time: now at the top, +12 hours at the bottom.
-	// The x scale is fluid: it fits the next 48 hours (not just the 12 shown),
-	// never spans less than MIN_SPAN_C, and its edges snap to STEP_C so the
-	// scale holds still between refreshes. Worked in °C whatever the display unit.
-	const MIN_SPAN_C = 12;
-	const STEP_C = 5;
+	// The x scale fits the 12 hours on screen, never spans less than MIN_SPAN_C
+	// (so a flat night doesn't fill the screen edge to edge), and its edges snap
+	// to whole degrees. Worked in °C whatever the display unit.
+	const MIN_SPAN_C = 8;
+	const STEP_C = 1;
 	const PAD_C = 1; // keeps the extremes off the very edge
-	// Dew point shares the axis, but may stretch it at most this far below the
-	// temperature; in drier air the dashed line runs off the left edge.
-	const DEW_REACH_C = 10;
+
+	// Humidity rides its own fixed scale across the same width: 40% at the left
+	// edge, 100% at the right, drier air resting on the edge. It shares the
+	// space, not the axis — where it crosses the temperature line means nothing.
+	const HUMIDITY_MIN = 40;
+	const HUMIDITY_MAX = 100;
 
 	const toCelsius = (t: number) => (weather.unit === 'fahrenheit' ? ((t - 32) * 5) / 9 : t);
 	const fromCelsius = (c: number) => (weather.unit === 'fahrenheit' ? (c * 9) / 5 + 32 : c);
+	const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
 	const axis = $derived.by(() => {
-		const tempMin = toCelsius(weather.range48h.min);
-		const dewMin = toCelsius(weather.range48h.dewPointMin);
-		let lo = Math.min(tempMin, Math.max(dewMin, tempMin - DEW_REACH_C)) - PAD_C;
-		let hi = toCelsius(weather.range48h.max) + PAD_C;
+		const temps = weather.next12h.map((h) => toCelsius(h.temperature));
+		let lo = Math.min(...temps) - PAD_C;
+		let hi = Math.max(...temps) + PAD_C;
 		if (hi - lo < MIN_SPAN_C) {
 			const mid = (lo + hi) / 2;
 			lo = mid - MIN_SPAN_C / 2;
@@ -73,31 +76,24 @@
 		return d;
 	}
 
-	function linePath(value: (h: Hour) => number) {
+	// `fraction` places an hour across the width: 0 is the left edge, 1 the right.
+	function linePath(fraction: (h: Hour) => number) {
 		if (!width || !height) return '';
 		const start = weather.next12h[0]?.time ?? 0;
 		return smoothPath(
 			weather.next12h.map((h) => ({
-				x: ((toCelsius(value(h)) - axis.min) / (axis.max - axis.min)) * width,
+				x: fraction(h) * width,
 				y: ((h.time - start) / HORIZON_SECONDS) * height
 			}))
 		);
 	}
 
-	const temperaturePath = $derived(linePath((h) => h.temperature));
-	const dewPointPath = $derived(linePath((h) => h.dewPoint));
-
-	// Dew point past the left edge (dry air): say where it went rather than
-	// drawing nothing, e.g. "2°–5°".
-	const dewOffscreen = $derived.by(() => {
-		const off = weather.next12h
-			.filter((h) => toCelsius(h.dewPoint) < axis.min)
-			.map((h) => Math.round(h.dewPoint));
-		if (!off.length) return '';
-		const lo = Math.min(...off);
-		const hi = Math.max(...off);
-		return lo === hi ? formatDegrees(lo) : `${formatDegrees(lo)}–${formatDegrees(hi)}`;
-	});
+	const temperaturePath = $derived(
+		linePath((h) => (toCelsius(h.temperature) - axis.min) / (axis.max - axis.min))
+	);
+	const humidityPath = $derived(
+		linePath((h) => clamp01((h.humidity - HUMIDITY_MIN) / (HUMIDITY_MAX - HUMIDITY_MIN)))
+	);
 
 	// Time ticks: every TICK_HOURS on the place's own clock (12 AM, 3 AM, …),
 	// skipping any that would crowd the location button at the top or the
@@ -126,13 +122,8 @@
 		const at = (p: Hour) => hour.format(new Date(p.time * 1000));
 		const high = hours.reduce((a, b) => (b.temperature > a.temperature ? b : a));
 		const low = hours.reduce((a, b) => (b.temperature < a.temperature ? b : a));
-		const gap = (h: Hour) => h.temperature - h.dewPoint;
-		const closest = hours.reduce((a, b) => (gap(b) < gap(a) ? b : a));
-		const dew =
-			gap(closest) <= 1
-				? `Dew point meets the temperature around ${at(closest)}: fog or dew likely.`
-				: `Dew point ${Math.round(hours[0].dewPoint)}° now, closest to the temperature around ${at(closest)}, ${Math.round(gap(closest))}° apart.`;
-		return `Next 12 hours: high ${Math.round(high.temperature)}° around ${at(high)}, low ${Math.round(low.temperature)}° around ${at(low)}. ${dew}`;
+		const humid = hours.reduce((a, b) => (b.humidity > a.humidity ? b : a));
+		return `Next 12 hours: high ${Math.round(high.temperature)}° around ${at(high)}, low ${Math.round(low.temperature)}° around ${at(low)}. Humidity ${Math.round(hours[0].humidity)}% now, highest ${Math.round(humid.humidity)}% around ${at(humid)}.`;
 	});
 </script>
 
@@ -145,8 +136,8 @@
 	class="absolute inset-y-0 right-4 left-4 @tablet:right-8 @tablet:left-8 @desktop:right-12 @desktop:left-12"
 >
 	<svg class="absolute inset-0 h-full w-full overflow-visible" aria-hidden="true">
-		<!-- Dew point under temperature, so where they meet the pink stays whole. -->
-		<path d={dewPointPath} fill="none" class="stroke-dew" stroke-width="2" stroke-dasharray="6 6" />
+		<!-- Humidity under temperature, so where they cross the pink stays whole. -->
+		<path d={humidityPath} fill="none" class="stroke-humidity" stroke-width="2" stroke-dasharray="6 6" />
 		<path
 			d={temperaturePath}
 			fill="none"
@@ -162,15 +153,10 @@
 		{/each}
 	</div>
 	<div
-		class="absolute inset-x-0 bottom-0 flex items-end justify-between pb-[max(0.375rem,env(safe-area-inset-bottom))] text-2xs text-text-muted"
+		class="absolute inset-x-0 bottom-0 flex justify-between pb-[max(0.375rem,env(safe-area-inset-bottom))] text-2xs text-text-muted"
 		aria-hidden="true"
 	>
-		<span class="flex flex-col">
-			{#if dewOffscreen}
-				<span class="text-dew-text">← dew point {dewOffscreen}</span>
-			{/if}
-			<span>{label(axis.min)}</span>
-		</span>
+		<span>{label(axis.min)}</span>
 		<span>{label(axis.max)}</span>
 	</div>
 </div>

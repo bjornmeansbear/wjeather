@@ -3,8 +3,9 @@ import type { Hour, Weather } from '$lib/weather';
 // Made-up weather for the preview page. Each series is one value per hour,
 // now → +12h (13 values); a shorter array holds its last value.
 type Series = {
+	startHour?: number; // the hour "now" falls on, labelled in UTC; default 9 PM
 	temps: number[];
-	dew?: number[]; // defaults to 7° below the temperature
+	humidity?: number[]; // %
 	cloud: number[];
 	precip?: number[];
 	pressure?: number[];
@@ -13,14 +14,16 @@ type Series = {
 	dir?: number[]; // degrees the wind comes from
 };
 
-const START = Date.UTC(2026, 8, 10, 21) / 1000; // 9 PM, labelled in UTC
+// Made-up sun: up from 6 AM to 7 PM.
+const isDaytime = (hourOfDay: number) => hourOfDay % 24 >= 6 && hourOfDay % 24 < 19;
 
 const ramp = (from: number, to: number, n = 13) =>
 	Array.from({ length: n }, (_, i) => from + ((to - from) * i) / (n - 1));
 
 function weather({
+	startHour = 21,
 	temps,
-	dew,
+	humidity = [60],
 	cloud,
 	precip = [0],
 	pressure = [1013],
@@ -29,8 +32,10 @@ function weather({
 	dir = [270]
 }: Series): Weather {
 	const at = (a: number[], i: number) => a[Math.min(i, a.length - 1)];
+	const start = Date.UTC(2026, 8, 10, startHour) / 1000;
 	const next12h: Hour[] = Array.from({ length: 13 }, (_, i) => ({
-		time: START + i * 3600,
+		time: start + i * 3600,
+		isDay: isDaytime(startHour + i),
 		temperature: at(temps, i),
 		cloudCover: at(cloud, i),
 		precipitation: at(precip, i),
@@ -38,7 +43,7 @@ function weather({
 		code: at(codes, i),
 		windSpeed: at(wind, i),
 		windDirection: at(dir, i),
-		dewPoint: dew ? at(dew, i) : at(temps, i) - 7
+		humidity: at(humidity, i)
 	}));
 	const all = next12h.map((h) => h.temperature);
 	return {
@@ -50,12 +55,7 @@ function weather({
 		low: Math.min(...all),
 		timezone: 'UTC',
 		utcOffsetSeconds: 0,
-		next12h,
-		range48h: {
-			min: Math.min(...all),
-			max: Math.max(...all),
-			dewPointMin: Math.min(...next12h.map((h) => h.dewPoint))
-		}
+		next12h
 	};
 }
 
@@ -64,7 +64,7 @@ export const states: { name: string; weather: Weather }[] = [
 		name: 'Clear and calm',
 		weather: weather({
 			temps: [24, 22, 21, 20, 19, 18, 17, 17, 16, 18, 21, 24, 26],
-			dew: [12, 12, 12, 12, 12, 12, 12, 12, 12, 13, 13, 13, 13],
+			humidity: [45, 52, 56, 60, 64, 68, 72, 72, 76, 68, 58, 50, 45],
 			cloud: [0],
 			codes: [0],
 			wind: [2]
@@ -72,13 +72,20 @@ export const states: { name: string; weather: Weather }[] = [
 	},
 	{
 		name: 'Overcast, a light northerly',
-		weather: weather({ temps: ramp(18, 15), dew: ramp(14, 13), cloud: [100], codes: [3], wind: [9], dir: [0] })
+		weather: weather({
+			temps: ramp(18, 15),
+			humidity: ramp(78, 86),
+			cloud: [100],
+			codes: [3],
+			wind: [9],
+			dir: [0]
+		})
 	},
 	{
 		name: 'Clearing after rain, wind veering',
 		weather: weather({
 			temps: ramp(14, 19),
-			dew: ramp(13, 8),
+			humidity: ramp(96, 62),
 			cloud: ramp(100, 0),
 			precip: [2, 1, 0.3, 0],
 			codes: [63, 61, 61, 3, 3, 3, 2, 2, 1, 1, 0],
@@ -90,7 +97,7 @@ export const states: { name: string; weather: Weather }[] = [
 		name: 'Clouding over into rain, wind rising',
 		weather: weather({
 			temps: ramp(22, 16),
-			dew: ramp(12, 15.5),
+			humidity: ramp(52, 97),
 			cloud: ramp(10, 100),
 			precip: [0, 0, 0, 0, 0, 0, 0, 0.2, 1, 2, 3, 3, 3],
 			codes: [0, 1, 1, 2, 2, 3, 3, 61, 63, 63, 65, 65, 63],
@@ -102,7 +109,7 @@ export const states: { name: string; weather: Weather }[] = [
 		name: 'Snow on a northeasterly',
 		weather: weather({
 			temps: ramp(-2, -7),
-			dew: ramp(-4, -9),
+			humidity: [88, 90, 92, 92, 93],
 			cloud: [100, 100, 95, 100],
 			codes: [71, 73, 73, 75, 75, 73, 71],
 			wind: [25, 28, 32, 30, 26],
@@ -113,6 +120,7 @@ export const states: { name: string; weather: Weather }[] = [
 		name: 'Sun and showers, gusty westerly',
 		weather: weather({
 			temps: [19, 18, 20, 17, 16, 19, 21, 18, 17, 20, 22, 21, 20],
+			humidity: [60, 62, 70, 88, 90, 72, 58, 80, 92, 74, 60, 55, 52],
 			cloud: [20, 30, 60, 90, 90, 50, 20, 70, 95, 60, 25, 15, 10],
 			codes: [1, 2, 2, 80, 80, 2, 1, 3, 81, 2, 1, 1, 1],
 			wind: [18, 22, 30, 42, 40, 24, 20, 34, 48, 28, 20, 16, 14],
@@ -123,17 +131,18 @@ export const states: { name: string; weather: Weather }[] = [
 		name: 'Fog forming on a still night',
 		weather: weather({
 			temps: [13, 12, 11.5, 11, 10.5, 10, 9.5, 9, 9, 9, 9.5, 11, 13],
-			dew: [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9.5, 10],
+			humidity: [76, 80, 83, 86, 89, 93, 97, 100, 100, 100, 96, 86, 75],
 			cloud: [0, 5, 10, 20, 40, 100, 100, 100, 100, 100, 80, 40, 20],
 			codes: [0, 0, 1, 1, 2, 45, 45, 45, 45, 45, 3, 2, 1],
 			wind: [3]
 		})
 	},
 	{
-		name: 'Dry desert heat',
+		name: 'Desert sunset into a clear night',
 		weather: weather({
-			temps: [40, 38, 36, 34, 32, 30, 29, 28, 28, 30, 33, 36, 39],
-			dew: [2, 2, 3, 3, 4, 4, 4, 5, 5, 4, 3, 3, 2],
+			startHour: 15,
+			temps: [40, 40, 39, 37, 35, 33, 31, 30, 29, 28, 27, 26, 25],
+			humidity: [8, 8, 9, 10, 12, 14, 16, 18, 19, 20, 21, 22, 22],
 			cloud: [0],
 			codes: [0],
 			wind: [12],
@@ -144,7 +153,7 @@ export const states: { name: string; weather: Weather }[] = [
 		name: 'Muggy, storms by morning',
 		weather: weather({
 			temps: [29, 28, 28, 27, 27, 26, 26, 25, 24, 24, 25, 26, 27],
-			dew: [23, 23, 23, 23, 23, 23, 23, 23, 23, 22, 22, 22, 22],
+			humidity: [70, 72, 72, 76, 76, 80, 80, 84, 95, 97, 94, 88, 82],
 			cloud: ramp(30, 100),
 			precip: [0, 0, 0, 0, 0, 0, 0, 8, 12, 4, 1, 0, 0],
 			codes: [1, 2, 2, 2, 3, 3, 3, 95, 95, 63, 61, 3, 3],

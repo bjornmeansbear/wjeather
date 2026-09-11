@@ -35,12 +35,15 @@
 	--band-cloud: var(--gray-1);
 	--band-rain: var(--blue-2); /* a step deeper: lighter blues read as near-white; blue-3 fails (labels 4.05, line 2.71) */
 	--band-snow: var(--blue-0); /* icy near-white; purple-1 read as the pink accent */
+	/* Clear sky after dark: the deepest purple that still passes everything —
+	   number 12.20, labels 5.24, pink line 3.50, humidity line 3.05. */
+	--band-night: var(--purple-2);
+	/* Stars on clear nights: the kit's lightest warm white. Texture, not text. */
+	--color-star: var(--brown-0);
 
-	/* Dew point line: green, the one hue the bands don't use. green-6 read as
+	/* Humidity line: green, the one hue the bands don't use. green-6 read as
 	   more brown; green-5 is visibly green, weakest on blue-2 at 3.13:1 (a line needs 3). */
-	--color-dew: var(--green-5);
-	/* Its small-text label needs 4.5:1, which green-5 misses; green-6's weakest is 5.21 (blue-2). */
-	--color-dew-text: var(--green-6);
+	--color-humidity: var(--green-5);
 }
 
 /* Dark mode — the measured mapping from RULES.md "Dark mode". */
@@ -62,9 +65,9 @@
 		--band-cloud: var(--gray-8);
 		--band-rain: var(--blue-7);
 		--band-snow: var(--dark-gray-7); /* cool, icy gray */
+		--band-night: var(--purple-9); /* stars on it: 18.84:1 */
 
-		--color-dew: var(--green-3); /* weakest on blue-7: 6.68:1 */
-		--color-dew-text: var(--green-3); /* passes as text too */
+		--color-humidity: var(--green-3); /* weakest on blue-7: 6.68:1 */
 	}
 }
 
@@ -95,8 +98,8 @@
 	--color-border: var(--color-border);
 	--color-accent: var(--color-accent);
 	--color-accent-hover: var(--color-accent-hover);
-	--color-dew: var(--color-dew);
-	--color-dew-text: var(--color-dew-text);
+	--color-humidity: var(--color-humidity);
+	--color-star: var(--color-star);
 
 	--font-sans: var(--font-sans);
 	--font-display: var(--font-display);
