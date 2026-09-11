@@ -34,7 +34,13 @@
 	--band-clear: var(--yellow-1);
 	--band-cloud: var(--gray-1);
 	--band-rain: var(--blue-2); /* a step deeper: lighter blues read as near-white; blue-3 fails (labels 4.05, line 2.71) */
-	--band-snow: var(--purple-1);
+	--band-snow: var(--blue-0); /* icy near-white; purple-1 read as the pink accent */
+
+	/* Dew point line: green, the one hue the bands don't use. green-6 read as
+	   more brown; green-5 is visibly green, weakest on blue-2 at 3.13:1 (a line needs 3). */
+	--color-dew: var(--green-5);
+	/* Its small-text label needs 4.5:1, which green-5 misses; green-6's weakest is 5.21 (blue-2). */
+	--color-dew-text: var(--green-6);
 }
 
 /* Dark mode — the measured mapping from RULES.md "Dark mode". */
@@ -55,7 +61,10 @@
 		--band-clear: var(--yellow-8);
 		--band-cloud: var(--gray-8);
 		--band-rain: var(--blue-7);
-		--band-snow: var(--purple-8);
+		--band-snow: var(--dark-gray-7); /* cool, icy gray */
+
+		--color-dew: var(--green-3); /* weakest on blue-7: 6.68:1 */
+		--color-dew-text: var(--green-3); /* passes as text too */
 	}
 }
 
@@ -86,6 +95,8 @@
 	--color-border: var(--color-border);
 	--color-accent: var(--color-accent);
 	--color-accent-hover: var(--color-accent-hover);
+	--color-dew: var(--color-dew);
+	--color-dew-text: var(--color-dew-text);
 
 	--font-sans: var(--font-sans);
 	--font-display: var(--font-display);

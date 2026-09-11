@@ -14,7 +14,7 @@
 <!-- A size container: the screen lays out by its own width, not the window's,
      so the preview page can show it in phone-sized frames on a desktop.
      The whole area is the chart: its top edge is now, its bottom edge +12 hours. -->
-<div class="relative @container flex flex-1 flex-col">
+<div class="relative @container flex flex-1 flex-col overflow-hidden">
 	<h1 class="sr-only">{describeTemperature(weather, placeName)}</h1>
 	<SkyBands {weather} />
 	<WindHatch {weather} />

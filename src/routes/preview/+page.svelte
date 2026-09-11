@@ -11,7 +11,9 @@
 	<h1 class="mb-2 text-xl">Preview</h1>
 	<p class="mb-8 max-w-[36rem] text-sm text-text-muted">
 		Made-up weather, each at phone size (360 × 640). Hue is the sky, and the edges between hours go
-		soft as cloud builds. Lines run with the wind, closer as it strengthens; calm air has none. Local only — a 404 in production.
+		soft as cloud builds. Lines run with the wind, closer as it strengthens; calm air has none.
+		The dashed green line is dew point: the narrower its gap to the pink, the damper the air — where
+		they meet, fog. Local only — a 404 in production.
 	</p>
 	<div class="flex flex-wrap gap-8">
 		{#each states as state (state.name)}

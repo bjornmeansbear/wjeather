@@ -13,6 +13,7 @@ export type Hour = {
 	code: number; // WMO weather code
 	windSpeed: number; // km/h at 10 m
 	windDirection: number; // degrees the wind comes from (0 = north)
+	dewPoint: number; // same unit as temperature
 };
 
 export type Weather = {
@@ -29,7 +30,7 @@ export type Weather = {
 	next12h: Hour[];
 	// Lowest and highest over the next 48 hours — the context the 12-hour
 	// line is scaled against, so a calm night doesn't fill the screen.
-	range48h: { min: number; max: number };
+	range48h: { min: number; max: number; dewPointMin: number };
 };
 
 type ForecastResponse = {
@@ -45,6 +46,7 @@ type ForecastResponse = {
 		pressure_msl: number;
 		wind_speed_10m: number;
 		wind_direction_10m: number;
+		dew_point_2m: number;
 	};
 	hourly: {
 		time: number[];
@@ -55,6 +57,7 @@ type ForecastResponse = {
 		pressure_msl: number[];
 		wind_speed_10m: number[];
 		wind_direction_10m: number[];
+		dew_point_2m: number[];
 	};
 	daily: { temperature_2m_max: number[]; temperature_2m_min: number[] };
 };
@@ -73,7 +76,8 @@ function next12Hours({ current, hourly }: ForecastResponse): Hour[] {
 			pressure: current.pressure_msl,
 			code: current.weather_code,
 			windSpeed: current.wind_speed_10m,
-			windDirection: current.wind_direction_10m
+			windDirection: current.wind_direction_10m,
+			dewPoint: current.dew_point_2m
 		}
 	];
 	for (let i = 0; i < hourly.time.length; i++) {
@@ -85,7 +89,8 @@ function next12Hours({ current, hourly }: ForecastResponse): Hour[] {
 			pressure: hourly.pressure_msl[i],
 			code: hourly.weather_code[i],
 			windSpeed: hourly.wind_speed_10m[i],
-			windDirection: hourly.wind_direction_10m[i]
+			windDirection: hourly.wind_direction_10m[i],
+			dewPoint: hourly.dew_point_2m[i]
 		};
 		if (hour.time <= start) continue;
 		if (hour.time >= end) {
@@ -100,7 +105,8 @@ function next12Hours({ current, hourly }: ForecastResponse): Hour[] {
 				pressure: lerp(prev.pressure, hour.pressure),
 				code: prev.code,
 				windSpeed: lerp(prev.windSpeed, hour.windSpeed),
-				windDirection: prev.windDirection // compass degrees wrap; don't average them
+				windDirection: prev.windDirection, // compass degrees wrap; don't average them
+				dewPoint: lerp(prev.dewPoint, hour.dewPoint)
 			});
 			break;
 		}
@@ -127,9 +133,9 @@ export async function getWeather(place: Place, unit: Unit): Promise<Weather> {
 		latitude: String(place.latitude),
 		longitude: String(place.longitude),
 		current:
-			'temperature_2m,weather_code,is_day,cloud_cover,precipitation,pressure_msl,wind_speed_10m,wind_direction_10m',
+			'temperature_2m,weather_code,is_day,cloud_cover,precipitation,pressure_msl,wind_speed_10m,wind_direction_10m,dew_point_2m',
 		hourly:
-			'temperature_2m,weather_code,cloud_cover,precipitation,pressure_msl,wind_speed_10m,wind_direction_10m',
+			'temperature_2m,weather_code,cloud_cover,precipitation,pressure_msl,wind_speed_10m,wind_direction_10m,dew_point_2m',
 		daily: 'temperature_2m_max,temperature_2m_min',
 		timezone: 'auto',
 		timeformat: 'unixtime',
@@ -152,7 +158,8 @@ export async function getWeather(place: Place, unit: Unit): Promise<Weather> {
 		next12h: next12Hours(data),
 		range48h: {
 			min: Math.min(data.current.temperature_2m, ...data.hourly.temperature_2m),
-			max: Math.max(data.current.temperature_2m, ...data.hourly.temperature_2m)
+			max: Math.max(data.current.temperature_2m, ...data.hourly.temperature_2m),
+			dewPointMin: Math.min(data.current.dew_point_2m, ...data.hourly.dew_point_2m)
 		}
 	};
 }
