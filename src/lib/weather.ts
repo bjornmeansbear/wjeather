@@ -13,32 +13,56 @@ export type Weather = {
 	isDay: boolean;
 	high: number;
 	low: number;
+	timezone: string; // IANA zone of the place, for formatting its times
+	// Now → now + 12 hours. The first point is the current reading, the last is
+	// interpolated to land exactly on +12 hours. `time` is unix seconds.
+	next12h: { time: number; temperature: number }[];
+	// Lowest and highest over the next 48 hours — the context the 12-hour
+	// line is scaled against, so a calm night doesn't fill the screen.
+	range48h: { min: number; max: number };
 };
 
 type ForecastResponse = {
-	current: { temperature_2m: number; weather_code: number; is_day: 0 | 1 };
+	timezone: string;
+	current: { time: number; temperature_2m: number; weather_code: number; is_day: 0 | 1 };
+	hourly: { time: number[]; temperature_2m: number[] };
 	daily: { temperature_2m_max: number[]; temperature_2m_min: number[] };
 };
 
-const FAHRENHEIT_REGIONS = new Set(['US', 'LR', 'MM', 'BS', 'BZ', 'KY', 'PW', 'FM', 'MH']);
+export const HORIZON_SECONDS = 12 * 60 * 60;
 
-export function preferredUnit(): Unit {
-	try {
-		const region = new Intl.Locale(navigator.language).maximize().region;
-		return region && FAHRENHEIT_REGIONS.has(region) ? 'fahrenheit' : 'celsius';
-	} catch {
-		return 'celsius';
+function next12Hours({ current, hourly }: ForecastResponse) {
+	const start = current.time;
+	const end = start + HORIZON_SECONDS;
+	const points = [{ time: start, temperature: current.temperature_2m }];
+	for (let i = 0; i < hourly.time.length; i++) {
+		const time = hourly.time[i];
+		const temperature = hourly.temperature_2m[i];
+		if (time <= start) continue;
+		if (time >= end) {
+			const prev = points[points.length - 1];
+			const f = (end - prev.time) / (time - prev.time);
+			points.push({ time: end, temperature: prev.temperature + f * (temperature - prev.temperature) });
+			break;
+		}
+		points.push({ time, temperature });
 	}
+	return points;
 }
+
+export const DEFAULT_UNIT: Unit = 'celsius';
 
 export async function getWeather(place: Place, unit: Unit): Promise<Weather> {
 	const params = new URLSearchParams({
 		latitude: String(place.latitude),
 		longitude: String(place.longitude),
 		current: 'temperature_2m,weather_code,is_day',
+		hourly: 'temperature_2m',
 		daily: 'temperature_2m_max,temperature_2m_min',
 		timezone: 'auto',
+		timeformat: 'unixtime',
 		forecast_days: '1',
+		forecast_hours: '49', // starts at the current hour; covers now + 48h
 		temperature_unit: unit
 	});
 	const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
@@ -50,7 +74,13 @@ export async function getWeather(place: Place, unit: Unit): Promise<Weather> {
 		code: data.current.weather_code,
 		isDay: data.current.is_day === 1,
 		high: data.daily.temperature_2m_max[0],
-		low: data.daily.temperature_2m_min[0]
+		low: data.daily.temperature_2m_min[0],
+		timezone: data.timezone,
+		next12h: next12Hours(data),
+		range48h: {
+			min: Math.min(data.current.temperature_2m, ...data.hourly.temperature_2m),
+			max: Math.max(data.current.temperature_2m, ...data.hourly.temperature_2m)
+		}
 	};
 }
 

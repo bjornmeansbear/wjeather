@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import ForecastLine from '$lib/ForecastLine.svelte';
 	import {
 		currentPosition,
 		findCity,
 		getWeather,
 		locationAllowed,
-		preferredUnit,
+		DEFAULT_UNIT,
 		type Place,
 		type Weather
 	} from '$lib/weather';
@@ -49,7 +50,7 @@
 		error = '';
 		try {
 			const p = await getPlace();
-			weather = await getWeather(p, preferredUnit());
+			weather = await getWeather(p, DEFAULT_UNIT);
 			place = p;
 			save(toSaved(p));
 			status = 'ready';
@@ -96,18 +97,20 @@
 </p>
 
 {#if status === 'ready' && weather}
-	<main class="flex min-h-dvh flex-col px-4 pt-4 tablet:px-8 desktop:px-12">
+	<main class="flex min-h-dvh flex-col">
 		<h1 class="sr-only">{spoken}</h1>
-		<div class="flex flex-1 items-end pb-4">
+		<!-- The graph fills this area: its top edge is now, the footer rule is +12 hours. -->
+		<div class="relative flex-1">
+			<ForecastLine {weather} />
 			<p
-				class="m-0 text-display font-normal tracking-[-0.04em] whitespace-nowrap"
+				class="relative m-0 px-4 pt-4 text-display font-normal tracking-[-0.04em] whitespace-nowrap tablet:px-8 desktop:px-12"
 				aria-hidden="true"
 			>
 				{display}
 			</p>
 		</div>
 		<footer
-			class="flex flex-wrap items-center justify-between gap-x-4 border-t border-border py-2 text-2xs text-text-muted"
+			class="mx-4 flex flex-wrap items-center justify-between gap-x-4 border-t border-border py-2 text-2xs text-text-muted tablet:mx-8 desktop:mx-12"
 		>
 			<button
 				type="button"
