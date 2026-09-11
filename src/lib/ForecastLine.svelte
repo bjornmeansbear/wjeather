@@ -75,8 +75,8 @@
 	});
 
 	// Time ticks: every TICK_HOURS on the place's own clock (12 AM, 3 AM, …),
-	// skipping any that would crowd "Now" at the top or the temperature
-	// labels at the bottom.
+	// skipping any that would crowd the location button at the top or the
+	// temperature labels at the bottom.
 	const TICK_HOURS = 3;
 	const ticks = $derived.by(() => {
 		const start = weather.next12h[0]?.time ?? 0;
@@ -86,7 +86,7 @@
 		const out: { y: number; text: string }[] = [];
 		for (let t = Math.ceil((start + offset) / step) * step - offset; t < start + HORIZON_SECONDS; t += step) {
 			const y = ((t - start) / HORIZON_SECONDS) * 100;
-			if (y >= 6 && y <= 92) out.push({ y, text: hour.format(new Date(t * 1000)) });
+			if (y >= 11 && y <= 92) out.push({ y, text: hour.format(new Date(t * 1000)) });
 		}
 		return out;
 	});
@@ -126,13 +126,12 @@
 		/>
 	</svg>
 	<div class="text-2xs text-text-muted" aria-hidden="true">
-		<span class="absolute top-0 right-0 pt-1">Now</span>
 		{#each ticks as tick (tick.y)}
 			<span class="absolute right-0 -translate-y-1/2" style:top="{tick.y}%">{tick.text}</span>
 		{/each}
 	</div>
 	<div
-		class="absolute inset-x-0 bottom-0 flex justify-between pb-1 text-2xs text-text-muted"
+		class="absolute inset-x-0 bottom-0 flex justify-between pb-[max(0.375rem,env(safe-area-inset-bottom))] text-2xs text-text-muted"
 		aria-hidden="true"
 	>
 		<span>{label(axis.min)}</span>
