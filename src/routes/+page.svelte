@@ -103,7 +103,7 @@
 		<div class="relative flex-1">
 			<ForecastLine {weather} />
 			<p
-				class="relative m-0 px-4 pt-4 text-display font-normal tracking-[-0.04em] whitespace-nowrap tablet:px-8 desktop:px-12"
+				class="relative m-0 px-4 pt-4 font-display text-display font-bold whitespace-nowrap tablet:px-8 desktop:px-12"
 				aria-hidden="true"
 			>
 				{display}
@@ -119,12 +119,7 @@
 			>
 				Change location
 			</button>
-			<a
-				class="inline-flex min-h-4 items-center underline underline-offset-4"
-				href="https://open-meteo.com/"
-			>
-				Weather data by Open-Meteo.com
-			</a>
+			<!-- Weather data by Open-Meteo.com (CC BY 4.0) — credited in the README, not on screen. -->
 		</footer>
 	</main>
 {:else if status !== 'starting'}

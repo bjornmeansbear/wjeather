@@ -4,23 +4,36 @@
    Layered as base so Tailwind utilities still win over its element rules. */
 @import '../lib/kit.css' layer(base);
 
+/* Basteleur (Keussel, OFL — see static/fonts/LICENSE-Basteleur.txt), the same
+   file oblique self-hosts. Used for the temperature only. */
+@font-face {
+	font-family: 'Basteleur';
+	src: url('/fonts/Basteleur-Bold.woff2') format('woff2');
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+
 /* Project tokens. The temperature sits above the kit's h1 rung, so it gets
-   its own size — still on the 6px baseline grid. */
+   its own size — still on the 6px baseline grid. Basteleur sets wide
+   ("−20°" is 2.61em), so each size is the largest where that still fits
+   inside the gutters at the breakpoint's narrowest width. */
 :root {
-	--text-display: 10rem; /* 160 */
-	--leading-display: 8.25rem; /* 132 = 22 × 6 */
+	--font-display: 'Basteleur', var(--font-sans);
+	--text-display: 8rem; /* 128 */
+	--leading-display: 7.125rem; /* 114 = 19 × 6 */
 }
 
 @media (min-width: 40rem) {
 	:root {
-		--text-display: 15rem; /* 240 */
-		--leading-display: 12rem; /* 192 = 32 × 6 */
+		--text-display: 13rem; /* 208 */
+		--leading-display: 11.625rem; /* 186 = 31 × 6 */
 	}
 }
 
 @media (min-width: 55rem) {
 	:root {
-		--text-display: 20rem; /* 320 */
+		--text-display: 17.5rem; /* 280 */
 		--leading-display: 15.75rem; /* 252 = 42 × 6 */
 	}
 }

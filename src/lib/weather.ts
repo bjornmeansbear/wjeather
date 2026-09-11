@@ -14,6 +14,7 @@ export type Weather = {
 	high: number;
 	low: number;
 	timezone: string; // IANA zone of the place, for formatting its times
+	utcOffsetSeconds: number; // the place's offset from UTC, for finding its clock hours
 	// Now → now + 12 hours. The first point is the current reading, the last is
 	// interpolated to land exactly on +12 hours. `time` is unix seconds.
 	next12h: { time: number; temperature: number }[];
@@ -24,6 +25,7 @@ export type Weather = {
 
 type ForecastResponse = {
 	timezone: string;
+	utc_offset_seconds: number;
 	current: { time: number; temperature_2m: number; weather_code: number; is_day: 0 | 1 };
 	hourly: { time: number[]; temperature_2m: number[] };
 	daily: { temperature_2m_max: number[]; temperature_2m_min: number[] };
@@ -76,6 +78,7 @@ export async function getWeather(place: Place, unit: Unit): Promise<Weather> {
 		high: data.daily.temperature_2m_max[0],
 		low: data.daily.temperature_2m_min[0],
 		timezone: data.timezone,
+		utcOffsetSeconds: data.utc_offset_seconds,
 		next12h: next12Hours(data),
 		range48h: {
 			min: Math.min(data.current.temperature_2m, ...data.hourly.temperature_2m),
