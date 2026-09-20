@@ -22,6 +22,7 @@ Cloudflare Pages, connected to this repo — every push to `main` deploys.
 
 - **Weather data:** [Open-Meteo.com](https://open-meteo.com/), licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Forecast and geocoding APIs, no key required.
 - **Typeface:** [Basteleur](https://velvetyne.fr/fonts/basteleur/) by Keussel, published by Velvetyne, [SIL Open Font License 1.1](static/fonts/LICENSE-Basteleur.txt).
+- **Typeface:** [IBM Plex Mono](https://github.com/IBM/plex) by IBM, [SIL Open Font License 1.1](static/fonts/LICENSE-IBMPlexMono.txt).
 - **Design tokens:** `src/lib/kit.css`, copied from `color-system-and-guidelines`.
 
 Built with SvelteKit and Tailwind CSS.

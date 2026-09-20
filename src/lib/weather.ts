@@ -98,9 +98,14 @@ export function formatDegrees(t: number) {
 	return `${r < 0 ? '−' : ''}${Math.abs(r)}°`;
 }
 
+export function formatHumidity(h: number) {
+	return `${Math.round(h)}% humidity`;
+}
+
 export function describeTemperature(w: Weather, placeName?: string) {
 	const unit = w.unit === 'fahrenheit' ? 'Fahrenheit' : 'Celsius';
-	return `${Math.round(w.temperature)} degrees ${unit}${placeName ? ` in ${placeName}` : ''}`;
+	const humidity = Math.round(w.next12h[0]?.humidity ?? NaN);
+	return `${Math.round(w.temperature)} degrees ${unit}${placeName ? ` in ${placeName}` : ''}${Number.isNaN(humidity) ? '' : `, ${humidity}% humidity`}`;
 }
 
 export async function getWeather(place: Place, unit: Unit): Promise<Weather> {

@@ -4,7 +4,7 @@
 	import SkyBands from '$lib/SkyBands.svelte';
 	import Stars from '$lib/Stars.svelte';
 	import WindHatch from '$lib/WindHatch.svelte';
-	import { describeTemperature, formatDegrees, type Weather } from '$lib/weather';
+	import { describeTemperature, formatDegrees, formatHumidity, type Weather } from '$lib/weather';
 
 	let {
 		weather,
@@ -27,6 +27,14 @@
 		aria-hidden="true"
 	>
 		{formatDegrees(weather.temperature)}
+	</p>
+	<!-- Mono, not the display serif or body sans: its own texture, the same
+	     move as the dashed humidity line taking its own hue in ForecastLine. -->
+	<p
+		class="relative m-0 -mt-1 px-4 font-mono text-sm text-text-muted whitespace-nowrap @tablet:-mt-2 @tablet:px-8 @tablet:text-md @desktop:px-12 @desktop:text-lg"
+		aria-hidden="true"
+	>
+		{formatHumidity(weather.next12h[0]?.humidity ?? 0)}
 	</p>
 	<!-- The key sits just left of the location button: 12 + 42 = 54px from the edge. -->
 	<Legend

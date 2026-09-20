@@ -14,12 +14,26 @@
 	font-display: swap;
 }
 
+/* IBM Plex Mono (IBM, OFL — see static/fonts/LICENSE-IBMPlexMono.txt), latin
+   subset only. Used for the humidity readout: fixed-width digits so the
+   number doesn't shift the layout as it updates, and a texture distinct from
+   Basteleur's display serif and the system-sans body — its own data channel,
+   the same idea as the dashed humidity line getting its own hue. */
+@font-face {
+	font-family: 'IBM Plex Mono';
+	src: url('/fonts/IBMPlexMono-Regular.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
 /* Project tokens. The temperature sits above the kit's h1 rung, so it gets
    its own size — still on the 6px baseline grid. Basteleur sets wide
    ("−20°" is 2.61em), so each size is the largest where that still fits
    inside the gutters at the breakpoint's narrowest width. */
 :root {
 	--font-display: 'Basteleur', var(--font-sans);
+	--font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
 	/* Applied per container width (@tablet / @desktop) in WeatherScreen. */
 	--text-display-sm: 8rem; /* 128 */
 	--leading-display-sm: 7.125rem; /* 114 = 19 × 6 */
