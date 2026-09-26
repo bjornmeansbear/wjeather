@@ -26,6 +26,21 @@
 	font-style: normal;
 	font-display: swap;
 }
+@font-face {
+	font-family: 'IBM Plex Mono';
+	src: url('/fonts/IBMPlexMono-SemiBold.woff2') format('woff2');
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+/* Bold is used for the humidity readout at phone width only; tablet and up drop back to 400. */
+@font-face {
+	font-family: 'IBM Plex Mono';
+	src: url('/fonts/IBMPlexMono-Bold.woff2') format('woff2');
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
 
 /* Project tokens. The temperature sits above the kit's h1 rung, so it gets
    its own size — still on the 6px baseline grid. Basteleur sets wide

@@ -31,7 +31,7 @@
 	<!-- Mono, not the display serif or body sans: its own texture, the same
 	     move as the dashed humidity line taking its own hue in ForecastLine. -->
 	<p
-		class="relative m-0 -mt-1 px-4 font-mono text-sm text-text-muted whitespace-nowrap @tablet:-mt-2 @tablet:px-8 @tablet:text-md @desktop:px-12 @desktop:text-lg"
+		class="humidlvl relative m-0 -mt-1 px-6 font-mono text-lg font-semibold text-text-muted whitespace-nowrap @tablet:-mt-2 @tablet:px-9 @tablet:text-2xl @tablet:font-normal @desktop:px-14 @desktop:text-3xl"
 		aria-hidden="true"
 	>
 		{formatHumidity(weather.next12h[0]?.humidity ?? 0)}
