@@ -21,7 +21,7 @@
 	<div class="flex flex-wrap gap-8">
 		{#each states as state (state.name)}
 			<figure class="m-0">
-				<div class="flex h-[40rem] w-[22.5rem] max-w-full flex-col border border-border">
+				<div class="flex h-[40rem] w-60 max-w-full flex-col border border-border">
 					<WeatherScreen weather={state.weather} />
 				</div>
 				<figcaption class="mt-2 text-sm">{state.name}</figcaption>
@@ -38,7 +38,7 @@
 	<div class="flex flex-wrap gap-8">
 		{#each windStates as state (state.name)}
 			<figure class="m-0">
-				<div class="flex h-[40rem] w-[22.5rem] max-w-full flex-col border border-border">
+				<div class="flex h-[40rem] w-60 max-w-full flex-col border border-border">
 					<WeatherScreen weather={state.weather} />
 				</div>
 				<figcaption class="mt-2 text-sm">{state.name}</figcaption>
@@ -55,7 +55,7 @@
 		{#each nightTints as tint (tint)}
 			<figure class="m-0">
 				<div
-					class="flex h-[40rem] w-[22.5rem] max-w-full flex-col border border-border"
+					class="flex h-[40rem] w-60 max-w-full flex-col border border-border"
 					style:--band-night="var(--{tint})"
 				>
 					<WeatherScreen weather={states[0].weather} />
