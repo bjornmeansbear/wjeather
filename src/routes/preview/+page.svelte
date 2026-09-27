@@ -1,6 +1,6 @@
 <script lang="ts">
 	import WeatherScreen from '$lib/WeatherScreen.svelte';
-	import { states } from './states';
+	import { states, windStates } from './states';
 
 	// Clear night, three ways: the band token overridden per frame.
 	const nightTints = ['purple-0', 'purple-1', 'purple-2'];
@@ -15,11 +15,28 @@
 	<p class="mb-8 max-w-[36rem] text-sm text-text-muted">
 		Made-up weather, each at phone size (360 × 640). Hue is the sky — yellow by day, purple with
 		stars on a clear night — and the edges between hours go soft as cloud builds, and always at
-		dawn and dusk. Lines run with the wind, closer as it strengthens; calm air has none.
+		dawn and dusk. Lines run with the wind, closer and darker as it strengthens; calm air has none.
 		The dashed green line is humidity: 40% at the left edge, 100% at the right. Local only — a 404 in production.
 	</p>
 	<div class="flex flex-wrap gap-8">
 		{#each states as state (state.name)}
+			<figure class="m-0">
+				<div class="flex h-[40rem] w-[22.5rem] max-w-full flex-col border border-border">
+					<WeatherScreen weather={state.weather} />
+				</div>
+				<figcaption class="mt-2 text-sm">{state.name}</figcaption>
+			</figure>
+		{/each}
+	</div>
+
+	<h2 class="mt-12 mb-2 text-lg">Wind speed</h2>
+	<p class="mb-8 max-w-[36rem] text-sm text-text-muted">
+		The same partly cloudy sky and westerly wind, only the speed changing. Under 5 km/h there are
+		no lines; from there to 60 km/h the gap between lines narrows from 36px to 6px and the
+		lines darken, quickest at the low end.
+	</p>
+	<div class="flex flex-wrap gap-8">
+		{#each windStates as state (state.name)}
 			<figure class="m-0">
 				<div class="flex h-[40rem] w-[22.5rem] max-w-full flex-col border border-border">
 					<WeatherScreen weather={state.weather} />

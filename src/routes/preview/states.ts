@@ -136,3 +136,12 @@ export const states: { name: string; weather: Weather }[] = [
 		})
 	}
 ];
+
+// One steady wind per frame, same sky and direction, so only the speed changes.
+const windOnly = (wind: number[]) =>
+	weather({ temps: [18], humidity: [60], codes: [2], wind, dir: [111] });
+
+export const windStates: { name: string; weather: Weather }[] = [
+	...[6, 10, 20, 30, 45, 60].map((kmh) => ({ name: `${kmh} km/h`, weather: windOnly([kmh]) })),
+	{ name: 'Calm → gale, 0 to 60 km/h', weather: windOnly(ramp(0, 60)) }
+];

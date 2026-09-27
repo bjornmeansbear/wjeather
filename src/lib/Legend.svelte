@@ -100,7 +100,7 @@
 					</g>
 				</svg>
 				<span>
-					Wind. Dashes run the way it blows and close up as it strengthens; they drift with it when
+					Wind. Dashes run the way it blows and close up and darken as it strengthens; they drift with it when
 					the app opens. No dashes: calm.
 				</span>
 			</li>

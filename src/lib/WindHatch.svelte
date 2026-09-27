@@ -7,6 +7,7 @@
 	// Wind as etched line work, one patch per hour down the time axis.
 	//   angle   — the lines run along the wind, north up like a map
 	//   spacing — closer as the wind strengthens; calm air has no lines
+	//   ink     — darker as the wind strengthens, a second cue for the same thing
 	// When the app opens or new weather arrives, each hour's lines drift the way
 	// that hour's wind blows, then settle still. The drift is what tells a
 	// north wind from a south one. It lasts under 5 s, so WCAG 2.2.2 needs no
@@ -15,7 +16,9 @@
 	const GALE_KMH = 60;
 	const WIDEST = 36; // px between lines at a light breeze (6 × 6)
 	const TIGHTEST = 6; // px at a gale
-	const INK = 0.3; // line opacity: present, but quieter than the number and labels
+	// Line opacity: present, but quieter than the number and labels even in a gale.
+	const INK_LIGHT = 0.25; // light breeze; still visible on the darkest sky
+	const INK_DARK = 0.4; // gale
 
 	// Long dashes rather than solid lines: a solid line sliding along itself
 	// looks identical, so the drift would be invisible. On the 6px grid.
@@ -26,10 +29,15 @@
 	const PX_PER_S_PER_KMH = 1.5; // a 10 km/h breeze leaves at 15 px/s (30 px in all); a gale at 90
 	const MIN_TRAVEL = 12; // px: even the lightest wind that draws lines visibly moves
 
+	// 0 at calm, 1 at a gale. Square root, so everyday winds (5–20 km/h) cover
+	// half the range; a straight line left them looking all the same.
+	function strength(speed: number) {
+		return Math.sqrt(Math.max(0, Math.min(1, (speed - CALM_KMH) / (GALE_KMH - CALM_KMH))));
+	}
+
 	function spacing(speed: number) {
 		if (speed < CALM_KMH) return 0;
-		const t = Math.min(1, (speed - CALM_KMH) / (GALE_KMH - CALM_KMH));
-		return Math.round(WIDEST - t * (WIDEST - TIGHTEST));
+		return Math.round(WIDEST - strength(speed) * (WIDEST - TIGHTEST));
 	}
 
 	const bands = $derived.by(() => {
@@ -40,6 +48,7 @@
 			top: y(h),
 			height: y(hours[i + 1]) - y(h),
 			spacing: spacing(h.windSpeed),
+			ink: INK_LIGHT + strength(h.windSpeed) * (INK_DARK - INK_LIGHT),
 			speed: h.windSpeed,
 			// The pattern's lines run down its y axis; rotated by the direction
 			// mod 180, +y points where the wind goes for directions under 180°,
@@ -101,10 +110,10 @@
 			{/if}
 		{/each}
 	</defs>
-	<g opacity={INK}>
+	<g>
 		{#each bands as band, i (i)}
 			{#if band.spacing}
-				<rect x="0" y="{band.top}%" width="100%" height="{band.height}%" fill="url(#{uid}-wind-{i})" />
+				<rect x="0" y="{band.top}%" width="100%" height="{band.height}%" fill="url(#{uid}-wind-{i})" opacity={band.ink} />
 			{/if}
 		{/each}
 	</g>
