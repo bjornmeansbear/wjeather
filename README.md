@@ -26,3 +26,12 @@ Cloudflare Pages, connected to this repo — every push to `main` deploys.
 - **Design tokens:** `src/lib/kit.css`, copied from `color-system-and-guidelines`.
 
 Built with SvelteKit and Tailwind CSS.
+
+## License
+
+The code is [AGPL-3.0](LICENSE): use it, change it, share it. If you change it and run it as a website, share your changes too.
+
+Not covered by that license:
+
+- **Weather data** comes from [Open-Meteo](https://open-meteo.com/), under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+- **Fonts:** IBM Plex Mono and Basteleur keep their own SIL Open Font License, included in `static/fonts/`.
