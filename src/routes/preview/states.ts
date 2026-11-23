@@ -11,7 +11,9 @@ type Series = {
 	dir?: number[]; // degrees the wind comes from
 };
 
-// Made-up sun: up from 6 AM to 7 PM.
+// Made-up sun: up from 6 AM to 7 PM — rises at 6:17, sets at 6:42 PM.
+const SUNRISE_MIN = 6 * 60 + 17;
+const SUNSET_MIN = 18 * 60 + 42;
 const isDaytime = (hourOfDay: number) => hourOfDay % 24 >= 6 && hourOfDay % 24 < 19;
 
 const ramp = (from: number, to: number, n = 13) =>
@@ -36,12 +38,19 @@ function weather({
 		windDirection: at(dir, i),
 		humidity: at(humidity, i)
 	}));
+	const end = start + 12 * 3600;
+	const day0 = Date.UTC(2026, 8, 10) / 1000;
+	const sun = [0, 1].flatMap((d) => [
+		{ kind: 'sunrise' as const, time: day0 + d * 86400 + SUNRISE_MIN * 60 },
+		{ kind: 'sunset' as const, time: day0 + d * 86400 + SUNSET_MIN * 60 }
+	]);
 	return {
 		temperature: next12h[0].temperature,
 		unit: 'celsius',
 		timezone: 'UTC',
 		utcOffsetSeconds: 0,
-		next12h
+		next12h,
+		sun: sun.filter((e) => e.time > start && e.time < end)
 	};
 }
 

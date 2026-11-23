@@ -68,6 +68,10 @@
 	--band-cloud-night: var(--purple-gray-1);
 	--band-rain: var(--blue-2); /* a step deeper: lighter blues read as near-white; blue-3 fails (labels 4.05, line 2.71) */
 	--band-snow: var(--blue-0); /* icy near-white; purple-1 read as the pink accent */
+	/* Snow after dark: the icy white tilted toward true blue — like cloud,
+	   the night twin of the day tint (ΔE2000 7.9 from snow, 6.7 from
+	   cloud-night). Number 13.55, labels 7.25, pink line 4.72, humidity 4.22. */
+	--band-snow-night: var(--cornflower-0);
 	/* Clear sky after dark: the deepest purple that still passes everything —
 	   number 9.79, labels 5.24, pink line 3.41, humidity line 3.05. */
 	--band-night: var(--purple-2);
@@ -77,6 +81,11 @@
 	/* Humidity line: green, the one hue the bands don't use. green-6 read as
 	   more brown; green-5 is visibly green, weakest on blue-2 at 3.13:1 (a line needs 3). */
 	--color-humidity: var(--green-5);
+
+	/* Sunrise/sunset rule and its label: Wjerk Golden Rod, the sun's colour.
+	   Weakest on purple-2 at 5.23:1, so the small label passes as text too.
+	   ΔE2000 45 from the pink line, 22 from the humidity green. */
+	--color-sun: var(--goldenrod-6);
 }
 
 /* Dark mode — the measured mapping from RULES.md "Dark mode". */
@@ -99,9 +108,11 @@
 		--band-cloud-night: var(--purple-gray-8); /* 16.80 / 9.37 / 7.86 / 9.61 */
 		--band-rain: var(--blue-7);
 		--band-snow: var(--dark-gray-7); /* cool, icy gray */
+		--band-snow-night: var(--cornflower-7); /* 11.82 / 6.60 / 5.53 / 6.76; ΔE2000 18.8 from snow */
 		--band-night: var(--purple-9); /* stars on it: 18.84:1 */
 
 		--color-humidity: var(--green-3); /* weakest on blue-7: 6.68:1 */
+		--color-sun: var(--goldenrod-3); /* weakest on blue-7: 6.52:1 */
 	}
 }
 
@@ -134,6 +145,7 @@
 	--color-accent-hover: var(--color-accent-hover);
 	--color-humidity: var(--color-humidity);
 	--color-star: var(--color-star);
+	--color-sun: var(--color-sun);
 
 	--font-sans: var(--font-sans);
 	--font-display: var(--font-display);

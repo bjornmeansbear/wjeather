@@ -11,7 +11,8 @@
 		{ token: '--band-cloud', label: 'Cloudy', stars: false },
 		{ token: '--band-cloud-night', label: 'Cloudy night', stars: false },
 		{ token: '--band-rain', label: 'Rain', stars: false },
-		{ token: '--band-snow', label: 'Snow', stars: false }
+		{ token: '--band-snow', label: 'Snow', stars: false },
+		{ token: '--band-snow-night', label: 'Snowy night', stars: false }
 	];
 </script>
 

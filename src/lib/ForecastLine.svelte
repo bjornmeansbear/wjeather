@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { sunRules } from '$lib/sky';
 	import { formatDegrees, HORIZON_SECONDS, type Hour, type Weather } from '$lib/weather';
 
 	let { weather }: { weather: Weather } = $props();
@@ -96,18 +97,22 @@
 	);
 
 	// Time ticks: every TICK_HOURS on the place's own clock (12 AM, 3 AM, …),
-	// skipping any that would crowd the location button at the top or the
-	// temperature labels at the bottom.
+	// skipping any that would crowd the location button at the top, the
+	// temperature labels at the bottom, or a sunrise/sunset label.
 	const TICK_HOURS = 3;
+	const SUN_CLEARANCE = 45 * 60; // seconds
 	const ticks = $derived.by(() => {
 		const start = weather.next12h[0]?.time ?? 0;
 		const step = TICK_HOURS * 60 * 60;
 		const offset = weather.utcOffsetSeconds;
 		const hour = new Intl.DateTimeFormat(undefined, { hour: 'numeric', timeZone: weather.timezone });
+		const sun = sunRules(weather);
 		const out: { y: number; text: string }[] = [];
 		for (let t = Math.ceil((start + offset) / step) * step - offset; t < start + HORIZON_SECONDS; t += step) {
 			const y = ((t - start) / HORIZON_SECONDS) * 100;
-			if (y >= 11 && y <= 92) out.push({ y, text: hour.format(new Date(t * 1000)) });
+			// …and any that would sit on a sunrise or sunset label (see SunLines).
+			const nearSun = sun.some((e) => Math.abs(t - e.at) < SUN_CLEARANCE);
+			if (y >= 11 && y <= 92 && !nearSun) out.push({ y, text: hour.format(new Date(t * 1000)) });
 		}
 		return out;
 	});

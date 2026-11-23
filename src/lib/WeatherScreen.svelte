@@ -3,6 +3,7 @@
 	import Legend from '$lib/Legend.svelte';
 	import SkyBands from '$lib/SkyBands.svelte';
 	import Stars from '$lib/Stars.svelte';
+	import SunLines from '$lib/SunLines.svelte';
 	import WindHatch from '$lib/WindHatch.svelte';
 	import { describeTemperature, formatDegrees, formatHumidity, type Weather } from '$lib/weather';
 
@@ -21,6 +22,7 @@
 	<SkyBands {weather} />
 	<Stars {weather} />
 	<WindHatch {weather} />
+	<SunLines {weather} />
 	<ForecastLine {weather} />
 	<p
 		class="relative m-0 px-4 pt-[max(1.5rem,env(safe-area-inset-top))] font-display text-display-sm font-bold whitespace-nowrap @tablet:px-8 @tablet:text-display-md @desktop:px-12 @desktop:text-display-lg"

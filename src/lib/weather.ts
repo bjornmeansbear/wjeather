@@ -15,6 +15,9 @@ export type Hour = {
 	isDay: boolean; // sun above the horizon at this hour
 };
 
+// Sunrise or sunset inside the 12 hours on screen; drawn as a rule across the sky.
+export type SunEvent = { kind: 'sunrise' | 'sunset'; time: number }; // unix seconds
+
 export type Weather = {
 	temperature: number;
 	unit: Unit;
@@ -23,6 +26,7 @@ export type Weather = {
 	// Now → now + 12 hours. The first point is the current reading, the last is
 	// interpolated to land exactly on +12 hours. `time` is unix seconds.
 	next12h: Hour[];
+	sun: SunEvent[]; // in time order; empty when the sun neither rises nor sets in the window
 };
 
 const FIELDS = 'temperature_2m,weather_code,is_day,wind_speed_10m,wind_direction_10m,relative_humidity_2m';
@@ -41,6 +45,7 @@ type ForecastResponse = {
 	utc_offset_seconds: number;
 	current: { time: number } & Readings<number>;
 	hourly: { time: number[] } & Readings<number[]>;
+	daily: { time: number[]; sunrise: number[]; sunset: number[] };
 };
 
 export const HORIZON_SECONDS = 12 * 60 * 60;
@@ -90,6 +95,26 @@ function next12Hours({ current, hourly }: ForecastResponse): Hour[] {
 	return hours;
 }
 
+// The sunrises and sunsets that fall between now and +12 hours. In polar night
+// and midnight sun Open-Meteo reports both at the day's own midnight; those
+// aren't events, so a time that lands on a day boundary is dropped.
+function sunEvents({ current, daily }: ForecastResponse): SunEvent[] {
+	const start = current.time;
+	const end = start + HORIZON_SECONDS;
+	const events: SunEvent[] = [];
+	daily.time.forEach((day, i) => {
+		const pair = [
+			{ kind: 'sunrise' as const, time: daily.sunrise[i] },
+			{ kind: 'sunset' as const, time: daily.sunset[i] }
+		];
+		for (const e of pair) {
+			if (e.time === day || e.time === day + 86400) continue;
+			if (e.time > start && e.time < end) events.push(e);
+		}
+	});
+	return events.sort((a, b) => a.time - b.time);
+}
+
 export const DEFAULT_UNIT: Unit = 'celsius';
 
 // A true minus sign, not a hyphen.
@@ -114,6 +139,8 @@ export async function getWeather(place: Place, unit: Unit): Promise<Weather> {
 		longitude: String(place.longitude),
 		current: FIELDS,
 		hourly: FIELDS,
+		daily: 'sunrise,sunset',
+		forecast_days: '2', // today and tomorrow: the 12 hours can cross midnight
 		timezone: 'auto',
 		timeformat: 'unixtime',
 		forecast_hours: '14', // starts at the current hour; covers now + 12h
@@ -127,7 +154,8 @@ export async function getWeather(place: Place, unit: Unit): Promise<Weather> {
 		unit,
 		timezone: data.timezone,
 		utcOffsetSeconds: data.utc_offset_seconds,
-		next12h: next12Hours(data)
+		next12h: next12Hours(data),
+		sun: sunEvents(data)
 	};
 }
 
