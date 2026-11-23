@@ -1,27 +1,130 @@
 <script lang="ts">
 	// The key: never shown first, always one tap away. Every sample below is
 	// drawn with the same tokens the screen uses, so the key can't drift from it.
-	let { class: className = '' }: { class?: string } = $props();
+	// `open` shows the key in place instead of behind the button (the preview page uses it).
+	// `layout`: 'grid' is the sky as a 3 × 3; 'pairs' is day and night side by
+	// side, one row per sky, storm across both columns. Both are on /preview.
+	let {
+		class: className = '',
+		open = false,
+		layout = 'grid'
+	}: { class?: string; open?: boolean; layout?: 'grid' | 'pairs' } = $props();
 	const titleId = $props.id();
-	let dialog: HTMLDialogElement;
+	let dialog = $state<HTMLDialogElement>();
 
+	// The sky as a 3 × 3: a day row, the same skies at night under it, then
+	// snow by day and night, and storm (one colour at any hour).
 	const skies = [
 		{ token: '--band-clear', label: 'Clear', stars: false },
-		{ token: '--band-night', label: 'Clear night', stars: true },
 		{ token: '--band-cloud', label: 'Cloudy', stars: false },
-		{ token: '--band-cloud-night', label: 'Cloudy night', stars: false },
 		{ token: '--band-rain', label: 'Rain', stars: false },
+		{ token: '--band-night', label: 'Clear night', stars: true },
+		{ token: '--band-cloud-night', label: 'Cloudy night', stars: false },
+		{ token: '--band-rain-night', label: 'Rainy night', stars: false },
 		{ token: '--band-snow', label: 'Snow', stars: false },
-		{ token: '--band-snow-night', label: 'Snowy night', stars: false }
+		{ token: '--band-snow-night', label: 'Snowy night', stars: false },
+		{ token: '--band-storm', label: 'Storm', stars: false }
+	];
+	const pairs = [
+		{ label: 'Clear', day: '--band-clear', night: '--band-night', stars: true },
+		{ label: 'Cloudy', day: '--band-cloud', night: '--band-cloud-night', stars: false },
+		{ label: 'Rain', day: '--band-rain', night: '--band-rain-night', stars: false },
+		{ label: 'Snow', day: '--band-snow', night: '--band-snow-night', stars: false }
 	];
 </script>
 
+{#snippet stars()}
+	<svg class="absolute inset-0 h-full w-full" aria-hidden="true">
+		<circle cx="20%" cy="30%" r="1" class="fill-star" />
+		<circle cx="55%" cy="65%" r="0.75" class="fill-star" />
+		<circle cx="80%" cy="25%" r="1" class="fill-star" />
+	</svg>
+{/snippet}
+
+{#snippet content()}
+	<p class="mb-4 text-sm">
+		Time runs down the screen: now at the top, twelve hours from now at the bottom.
+	</p>
+
+	<ul class="m-0 flex list-none flex-col gap-4 p-0 text-sm">
+		<li class="flex items-center gap-3">
+			<svg class="shrink-0" width="48" height="12" aria-hidden="true">
+				<line x1="0" y1="6" x2="48" y2="6" class="stroke-accent" stroke-width="2" />
+			</svg>
+			<span>Temperature. Left is cooler, right is warmer; the corner labels give the range.</span>
+		</li>
+		<li class="flex items-center gap-3">
+			<svg class="shrink-0" width="48" height="12" aria-hidden="true">
+				<line x1="0" y1="6" x2="48" y2="6" class="stroke-humidity" stroke-width="2" stroke-dasharray="6 6" />
+			</svg>
+			<span>Humidity. 40% at the left edge, 100% at the right.</span>
+		</li>
+
+		<li>
+			<span class="mb-2 block">The sky, hour by hour:</span>
+			{#if layout === 'pairs'}
+				<div class="grid grid-cols-[auto_1fr_1fr] items-center text-2xs">
+					<span></span>
+					<span class="pb-1 text-text-muted">By day</span>
+					<span class="pb-1 text-text-muted">At night</span>
+					{#each pairs as pair (pair.label)}
+						<span class="pr-3">{pair.label}</span>
+						<div class="h-4 border-t border-l border-border" style:background="var({pair.day})"></div>
+						<div class="relative h-4 border-x border-t border-border" style:background="var({pair.night})">
+							{#if pair.stars}{@render stars()}{/if}
+						</div>
+					{/each}
+					<span class="pr-3">Storm</span>
+					<div class="col-span-2 h-4 border border-border" style:background="var(--band-storm)"></div>
+				</div>
+			{:else}
+				<div class="grid grid-cols-3 gap-2">
+					{#each skies as sky (sky.token)}
+						<div>
+							<div class="relative h-4 border border-border" style:background="var({sky.token})">
+								{#if sky.stars}{@render stars()}{/if}
+							</div>
+							<span class="mt-1 block text-2xs">{sky.label}</span>
+						</div>
+					{/each}
+				</div>
+			{/if}
+		</li>
+		<li class="flex items-center gap-3">
+			<svg class="shrink-0" width="48" height="12" aria-hidden="true">
+				<line x1="0" y1="6" x2="48" y2="6" class="stroke-sun" stroke-width="1" />
+			</svg>
+			<span>Sunrise or sunset, drawn on the hour the sky turns; the label gives the exact time.</span>
+		</li>
+
+		<li class="flex items-center gap-3">
+			<svg class="shrink-0" width="48" height="24" aria-hidden="true">
+				<g class="stroke-text" stroke-width="1" stroke-dasharray="18 6" opacity="0.4">
+					<line x1="0" y1="18" x2="48" y2="2" />
+					<line x1="0" y1="26" x2="48" y2="10" />
+					<line x1="6" y1="30" x2="54" y2="14" />
+				</g>
+			</svg>
+			<span>
+				Wind. Dashes run the way it blows and close up and darken as it strengthens; they drift with it when
+				the app opens. No dashes: calm.
+			</span>
+		</li>
+	</ul>
+{/snippet}
+
+{#if open}
+	<section aria-labelledby={titleId} class="{className} border-2 border-border bg-bg p-4 text-text">
+		<h2 id={titleId} class="m-0 mb-4 border-b border-border pb-2 text-lg">Key</h2>
+		{@render content()}
+	</section>
+{:else}
 <button
 	type="button"
 	class="{className} grid size-7 cursor-pointer place-items-center text-text-muted active:bg-text active:text-bg"
 	aria-label="Show key"
 	aria-haspopup="dialog"
-	onclick={() => dialog.showModal()}
+	onclick={() => dialog?.showModal()}
 >
 	<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
 		<circle cx="9" cy="9" r="7.25" />
@@ -39,7 +142,7 @@
 	aria-labelledby={titleId}
 	class="m-auto max-h-[calc(100dvh-2rem)] w-[min(24rem,calc(100%-2rem))] overflow-y-auto border-2 border-border bg-bg p-0 text-text backdrop:bg-text/50"
 	onclick={(e) => {
-		if (e.target === dialog) dialog.close();
+		if (e.target === dialog) dialog?.close();
 	}}
 >
 	<div class="p-4">
@@ -48,63 +151,13 @@
 			<button
 				type="button"
 				class="inline-flex min-h-4 cursor-pointer items-center text-sm underline underline-offset-4"
-				onclick={() => dialog.close()}
+				onclick={() => dialog?.close()}
 			>
 				Close
 			</button>
 		</div>
 
-		<p class="mb-4 text-sm">
-			Time runs down the screen: now at the top, twelve hours from now at the bottom.
-		</p>
-
-		<ul class="m-0 flex list-none flex-col gap-4 p-0 text-sm">
-			<li class="flex items-center gap-3">
-				<svg class="shrink-0" width="48" height="12" aria-hidden="true">
-					<line x1="0" y1="6" x2="48" y2="6" class="stroke-accent" stroke-width="2" />
-				</svg>
-				<span>Temperature. Left is cooler, right is warmer; the corner labels give the range.</span>
-			</li>
-			<li class="flex items-center gap-3">
-				<svg class="shrink-0" width="48" height="12" aria-hidden="true">
-					<line x1="0" y1="6" x2="48" y2="6" class="stroke-humidity" stroke-width="2" stroke-dasharray="6 6" />
-				</svg>
-				<span>Humidity. 40% at the left edge, 100% at the right.</span>
-			</li>
-
-			<li>
-				<span class="mb-2 block">The sky, hour by hour:</span>
-				<div class="grid grid-cols-3 gap-2">
-					{#each skies as sky (sky.token)}
-						<div>
-							<div class="relative h-4 border border-border" style:background="var({sky.token})">
-								{#if sky.stars}
-									<svg class="absolute inset-0 h-full w-full" aria-hidden="true">
-										<circle cx="20%" cy="30%" r="1" class="fill-star" />
-										<circle cx="55%" cy="65%" r="0.75" class="fill-star" />
-										<circle cx="80%" cy="25%" r="1" class="fill-star" />
-									</svg>
-								{/if}
-							</div>
-							<span class="mt-1 block text-2xs">{sky.label}</span>
-						</div>
-					{/each}
-				</div>
-			</li>
-
-			<li class="flex items-center gap-3">
-				<svg class="shrink-0" width="48" height="24" aria-hidden="true">
-					<g class="stroke-text" stroke-width="1" stroke-dasharray="18 6" opacity="0.4">
-						<line x1="0" y1="18" x2="48" y2="2" />
-						<line x1="0" y1="26" x2="48" y2="10" />
-						<line x1="6" y1="30" x2="54" y2="14" />
-					</g>
-				</svg>
-				<span>
-					Wind. Dashes run the way it blows and close up and darken as it strengthens; they drift with it when
-					the app opens. No dashes: calm.
-				</span>
-			</li>
-		</ul>
+		{@render content()}
 	</div>
 </dialog>
+{/if}

@@ -100,7 +100,7 @@
 	// skipping any that would crowd the location button at the top, the
 	// temperature labels at the bottom, or a sunrise/sunset label.
 	const TICK_HOURS = 3;
-	const SUN_CLEARANCE = 45 * 60; // seconds
+	const SUN_CLEARANCE = 80 * 60; // seconds: the rule can sit up to an hour from its own time
 	const ticks = $derived.by(() => {
 		const start = weather.next12h[0]?.time ?? 0;
 		const step = TICK_HOURS * 60 * 60;

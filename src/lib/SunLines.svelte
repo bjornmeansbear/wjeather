@@ -30,7 +30,11 @@
 	<p class="sr-only">{summary}</p>
 	<div class="absolute inset-0" aria-hidden="true">
 		{#each rules as rule (rule.time)}
-			<div class="absolute inset-x-0 border-t border-sun" style:top="{rule.y}%"></div>
+			<div
+				class="absolute inset-x-0 border-t border-sun"
+				style:top="{rule.y}%"
+				style:border-top-width="var(--sun-line-width, 1px)"
+			></div>
 			{#if rule.labelled}
 				<span
 					class="absolute right-4 -translate-y-full pb-0.5 text-2xs text-sun @tablet:right-8 @desktop:right-12"

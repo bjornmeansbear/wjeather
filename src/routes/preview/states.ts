@@ -143,6 +143,49 @@ export const states: { name: string; weather: Weather }[] = [
 			wind: [8, 8, 10, 12, 14, 20, 28, 35, 30, 20, 15, 12, 10],
 			dir: [180, 180, 190, 200, 210, 230, 250, 270, 280, 290, 290, 290, 290]
 		})
+	},
+	{
+		name: 'Overcast into the night',
+		weather: weather({
+			startHour: 14,
+			temps: ramp(17, 11),
+			humidity: ramp(70, 88),
+			codes: [3],
+			wind: [8]
+		})
+	},
+	{
+		name: 'Rain from afternoon into night',
+		weather: weather({
+			startHour: 15,
+			temps: ramp(14, 10),
+			humidity: ramp(88, 98),
+			codes: [61, 61, 63, 63, 63, 65, 65, 63, 63, 61, 61, 61, 61],
+			wind: [18],
+			dir: [200]
+		})
+	},
+	{
+		name: 'Snow from afternoon into night',
+		weather: weather({
+			startHour: 13,
+			temps: ramp(-1, -6),
+			humidity: [90],
+			codes: [71, 71, 73, 73, 73, 75, 75, 73, 73, 71, 71, 71, 71],
+			wind: [12],
+			dir: [20]
+		})
+	},
+	{
+		name: 'Thunderstorm at dusk',
+		weather: weather({
+			startHour: 15,
+			temps: [31, 32, 30, 26, 23, 22, 22, 21, 21, 20, 20, 19, 19],
+			humidity: [55, 58, 70, 90, 96, 94, 90, 88, 86, 84, 82, 80, 80],
+			codes: [1, 2, 3, 95, 95, 95, 96, 63, 61, 3, 3, 2, 1],
+			wind: [10, 14, 30, 55, 50, 40, 30, 22, 16, 12, 10, 8, 8],
+			dir: [180, 200, 240, 270, 280, 285, 290, 290, 290, 290, 290, 290, 290]
+		})
 	}
 ];
 
@@ -151,6 +194,9 @@ const windOnly = (wind: number[]) =>
 	weather({ temps: [18], humidity: [60], codes: [2], wind, dir: [111] });
 
 export const windStates: { name: string; weather: Weather }[] = [
-	...[6, 10, 20, 30, 45, 60].map((kmh) => ({ name: `${kmh} km/h`, weather: windOnly([kmh]) })),
+	...[6, 10, 20, 30, 45, 60].map((kmh) => ({
+		name: `${kmh} km/h`,
+		weather: windOnly([kmh])
+	})),
 	{ name: 'Calm → gale, 0 to 60 km/h', weather: windOnly(ramp(0, 60)) }
 ];

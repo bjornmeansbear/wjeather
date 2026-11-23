@@ -67,6 +67,10 @@
 	   Number 12.16, labels 6.50, pink line 4.23, humidity line 3.79. */
 	--band-cloud-night: var(--purple-gray-1);
 	--band-rain: var(--blue-2); /* a step deeper: lighter blues read as near-white; blue-3 fails (labels 4.05, line 2.71) */
+	/* Rain after dark: as deep as rain can go (step 3 fails, above), so it
+	   reads darker by hue instead — the same step in true blue, more chroma.
+	   ΔE2000 16.6 from rain. Number 9.81, labels 5.24, pink 3.41, humidity 3.05. */
+	--band-rain-night: var(--cornflower-2);
 	--band-snow: var(--blue-0); /* icy near-white; purple-1 read as the pink accent */
 	/* Snow after dark: the icy white tilted toward true blue — like cloud,
 	   the night twin of the day tint (ΔE2000 7.9 from snow, 6.7 from
@@ -75,6 +79,10 @@
 	/* Clear sky after dark: the deepest purple that still passes everything —
 	   number 9.79, labels 5.24, pink line 3.41, humidity line 3.05. */
 	--band-night: var(--purple-2);
+	/* Thunderstorm, day or night: warning orange, the one warm hue the other
+	   skies don't use. Number 10.96, labels 5.86, pink 3.81, humidity 3.41,
+	   sun line 5.86. */
+	--band-storm: var(--orange-1);
 	/* Stars on clear nights: the kit's lightest warm white. Texture, not text. */
 	--color-star: var(--brown-0);
 
@@ -107,9 +115,11 @@
 		--band-cloud: var(--gray-8);
 		--band-cloud-night: var(--purple-gray-8); /* 16.80 / 9.37 / 7.86 / 9.61 */
 		--band-rain: var(--blue-7);
+		--band-rain-night: var(--cornflower-8); /* darker than rain: 16.89 / 9.42 / 7.90 / 9.66 */
 		--band-snow: var(--dark-gray-7); /* cool, icy gray */
 		--band-snow-night: var(--cornflower-7); /* 11.82 / 6.60 / 5.53 / 6.76; ΔE2000 18.8 from snow */
 		--band-night: var(--purple-9); /* stars on it: 18.84:1 */
+		--band-storm: var(--orange-8); /* 17.12 / 9.55 / 8.01 / 9.79; sun line 9.56 */
 
 		--color-humidity: var(--green-3); /* weakest on blue-7: 6.68:1 */
 		--color-sun: var(--goldenrod-3); /* weakest on blue-7: 6.52:1 */
