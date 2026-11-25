@@ -27,28 +27,6 @@
 			]
 		},
 		{
-			title: 'Rainy night',
-			note: 'Light mode can’t go darker than step 2 (the pink line fails on step 3), so night rain changes hue instead.',
-			scene: 'Rain from afternoon into night',
-			prop: '--band-rain-night',
-			options: [
-				{ label: 'cornflower-2 (now) · 9.81 / 5.24 / 3.41 / 3.05', value: 'var(--cornflower-2)' },
-				{ label: 'cornflower-1 · 12.23 / 6.54 / 4.25 / 3.81', value: 'var(--cornflower-1)' },
-				{ label: 'blue-2 (same as day rain)', value: 'var(--blue-2)' }
-			]
-		},
-		{
-			title: 'Snowy night',
-			note: '',
-			scene: 'Snow from afternoon into night',
-			prop: '--band-snow-night',
-			options: [
-				{ label: 'cornflower-0 (now) · 13.55 / 7.25 / 4.72 / 4.22', value: 'var(--cornflower-0)' },
-				{ label: 'purple-gray-0', value: 'var(--purple-gray-0)' },
-				{ label: 'blue-0 (same as day snow)', value: 'var(--blue-0)' }
-			]
-		},
-		{
 			title: 'Storm',
 			note: 'One colour, day or night. red-0 sits closest to the pink accent.',
 			scene: 'Thunderstorm at dusk',
@@ -96,8 +74,8 @@
 <main class="px-4 py-8 tablet:px-8">
 	<h1 class="mb-2 text-xl">Preview</h1>
 	<p class="mb-8 max-w-[36rem] text-sm text-text-muted">
-		Made-up weather, each at phone size (360 × 640). Hue is the sky, in nine colours: clear,
-		cloudy, rain and snow, each by day and at night, and storm at any hour. The gold rule is
+		Made-up weather, each at phone size (360 × 640). Hue is the sky, in six colours: clear and
+		cloudy split by day and night; rain, snow and storm are the same at any hour. The gold rule is
 		sunrise or sunset, on the hour the sky turns. Lines run with the wind, closer and darker as it
 		strengthens; calm air has none. The dashed green line is humidity: 40% at the left edge, 100%
 		at the right. Switch the system to dark mode to see the dark palette. Local only — a 404 in
@@ -105,15 +83,8 @@
 	</p>
 
 	<h2 class="mb-4 text-lg">Key</h2>
-	<div class="flex flex-wrap items-start gap-8">
-		<div class="w-[24rem] max-w-full">
-			<Legend open layout="grid" />
-			<p class="mt-2 text-sm">3 × 3: day row, night row, then snow and storm</p>
-		</div>
-		<div class="w-[24rem] max-w-full">
-			<Legend open layout="pairs" />
-			<p class="mt-2 text-sm">Day and night side by side, storm across both</p>
-		</div>
+	<div class="w-[24rem] max-w-full">
+		<Legend open />
 	</div>
 
 	<h2 class="mt-12 mb-4 text-lg">Scenes</h2>

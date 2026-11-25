@@ -1,20 +1,21 @@
 import type { Hour, SunEvent, Weather } from '$lib/weather';
 
 // The background: one band per hour down the time axis, now at the top.
-//   hue   — the sky (clear / cloud / rain / snow, each by day and by night;
-//           storm, the same at any hour)
+//   hue   — the sky: clear and cloud split by day and night (they're about
+//           light); rain, snow and storm are about what falls, so one colour
+//           at any hour — the sunrise/sunset rule carries day and night
 //   edges — hard at every hour: an hour is a hard fact, not a fade
 // Tints are the --band-* tokens in layout.css, contrast-checked in both modes.
 
-export type Sky = 'clear' | 'night' | 'cloud' | 'cloud-night' | 'rain' | 'rain-night' | 'snow' | 'snow-night' | 'storm';
+export type Sky = 'clear' | 'night' | 'cloud' | 'cloud-night' | 'rain' | 'snow' | 'storm';
 
 // WMO weather codes → the skies; a clear sky after dark is 'night'.
 export function sky(hour: Hour): Sky {
 	const code = hour.code;
 	if (code <= 1) return hour.isDay ? 'clear' : 'night';
-	if ((code >= 71 && code <= 77) || code === 85 || code === 86) return hour.isDay ? 'snow' : 'snow-night';
+	if ((code >= 71 && code <= 77) || code === 85 || code === 86) return 'snow';
 	if (code >= 95) return 'storm'; // thunderstorm, with or without hail: a warning, day or night
-	if (code >= 51) return hour.isDay ? 'rain' : 'rain-night'; // drizzle, rain, showers
+	if (code >= 51) return 'rain'; // drizzle, rain, showers
 	// partly cloudy, overcast, fog — cooler after dark, like the clear sky
 	return hour.isDay ? 'cloud' : 'cloud-night';
 }
@@ -45,9 +46,7 @@ const WORDS: Record<Sky, string> = {
 	cloud: 'cloudy',
 	'cloud-night': 'cloudy',
 	rain: 'rain',
-	'rain-night': 'rain',
 	snow: 'snow',
-	'snow-night': 'snow',
 	storm: 'thunderstorms'
 };
 
@@ -55,8 +54,7 @@ export function skySummary(hours: Hour[], timezone: string) {
 	if (hours.length < 2) return '';
 	const hour = new Intl.DateTimeFormat(undefined, { hour: 'numeric', timeZone: timezone });
 	const parts: string[] = [];
-	// Compared by word, not by sky: cloud and cloud-night both say "cloudy"
-	// (and both rains "rain", both snows "snow"),
+	// Compared by word, not by sky: cloud and cloud-night both say "cloudy",
 	// and dusk shouldn't add "cloudy from 7 PM" to a sentence already saying it.
 	let last: string | null = null;
 	for (const h of hours.slice(0, -1)) {

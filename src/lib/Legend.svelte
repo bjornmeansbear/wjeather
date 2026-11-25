@@ -2,34 +2,21 @@
 	// The key: never shown first, always one tap away. Every sample below is
 	// drawn with the same tokens the screen uses, so the key can't drift from it.
 	// `open` shows the key in place instead of behind the button (the preview page uses it).
-	// `layout`: 'grid' is the sky as a 3 × 3; 'pairs' is day and night side by
-	// side, one row per sky, storm across both columns. Both are on /preview.
-	let {
-		class: className = '',
-		open = false,
-		layout = 'grid'
-	}: { class?: string; open?: boolean; layout?: 'grid' | 'pairs' } = $props();
+	let { class: className = '', open = false }: { class?: string; open?: boolean } = $props();
 	const titleId = $props.id();
 	let dialog = $state<HTMLDialogElement>();
 
-	// The sky as a 3 × 3: a day row, the same skies at night under it, then
-	// snow by day and night, and storm (one colour at any hour).
-	const skies = [
-		{ token: '--band-clear', label: 'Clear', stars: false },
-		{ token: '--band-cloud', label: 'Cloudy', stars: false },
-		{ token: '--band-rain', label: 'Rain', stars: false },
-		{ token: '--band-night', label: 'Clear night', stars: true },
-		{ token: '--band-cloud-night', label: 'Cloudy night', stars: false },
-		{ token: '--band-rain-night', label: 'Rainy night', stars: false },
-		{ token: '--band-snow', label: 'Snow', stars: false },
-		{ token: '--band-snow-night', label: 'Snowy night', stars: false },
-		{ token: '--band-storm', label: 'Storm', stars: false }
-	];
+	// The sky as a table: clear and cloudy change with the sun, so they get a
+	// day cell and a night cell; rain, snow and storm are what falls, the same
+	// at any hour, so they span both columns.
 	const pairs = [
 		{ label: 'Clear', day: '--band-clear', night: '--band-night', stars: true },
-		{ label: 'Cloudy', day: '--band-cloud', night: '--band-cloud-night', stars: false },
-		{ label: 'Rain', day: '--band-rain', night: '--band-rain-night', stars: false },
-		{ label: 'Snow', day: '--band-snow', night: '--band-snow-night', stars: false }
+		{ label: 'Cloudy', day: '--band-cloud', night: '--band-cloud-night', stars: false }
+	];
+	const falling = [
+		{ label: 'Rain', token: '--band-rain' },
+		{ label: 'Snow', token: '--band-snow' },
+		{ label: 'Storm', token: '--band-storm' }
 	];
 </script>
 
@@ -62,33 +49,26 @@
 
 		<li>
 			<span class="mb-2 block">The sky, hour by hour:</span>
-			{#if layout === 'pairs'}
-				<div class="grid grid-cols-[auto_1fr_1fr] items-center text-2xs">
-					<span></span>
-					<span class="pb-1 text-text-muted">By day</span>
-					<span class="pb-1 text-text-muted">At night</span>
-					{#each pairs as pair (pair.label)}
-						<span class="pr-3">{pair.label}</span>
-						<div class="h-4 border-t border-l border-border" style:background="var({pair.day})"></div>
-						<div class="relative h-4 border-x border-t border-border" style:background="var({pair.night})">
-							{#if pair.stars}{@render stars()}{/if}
-						</div>
-					{/each}
-					<span class="pr-3">Storm</span>
-					<div class="col-span-2 h-4 border border-border" style:background="var(--band-storm)"></div>
-				</div>
-			{:else}
-				<div class="grid grid-cols-3 gap-2">
-					{#each skies as sky (sky.token)}
-						<div>
-							<div class="relative h-4 border border-border" style:background="var({sky.token})">
-								{#if sky.stars}{@render stars()}{/if}
-							</div>
-							<span class="mt-1 block text-2xs">{sky.label}</span>
-						</div>
-					{/each}
-				</div>
-			{/if}
+			<div class="grid grid-cols-[auto_1fr_1fr] items-center text-2xs">
+				<span></span>
+				<span class="pb-1 text-text-muted">By day</span>
+				<span class="pb-1 text-text-muted">At night</span>
+				{#each pairs as pair (pair.label)}
+					<span class="pr-3">{pair.label}</span>
+					<div class="h-4 border-t border-l border-border" style:background="var({pair.day})"></div>
+					<div class="relative h-4 border-x border-t border-border" style:background="var({pair.night})">
+						{#if pair.stars}{@render stars()}{/if}
+					</div>
+				{/each}
+				{#each falling as sky, i (sky.label)}
+					<span class="pr-3">{sky.label}</span>
+					<div
+						class="col-span-2 h-4 border-x border-t border-border"
+						class:border-b={i === falling.length - 1}
+						style:background="var({sky.token})"
+					></div>
+				{/each}
+			</div>
 		</li>
 		<li class="flex items-center gap-3">
 			<svg class="shrink-0" width="48" height="12" aria-hidden="true">
